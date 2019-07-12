@@ -21,7 +21,7 @@ Production ready.
 ```
 
 * `stable fetch` to fetch your dependencies
-* `use "net-ssl"` to include this package
+* `use "net_ssl"` to include this package
 * `stable env ponyc` to compile your application
 
 ## Dependencies
