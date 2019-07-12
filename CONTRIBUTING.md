@@ -21,7 +21,7 @@ If you submit a pull request to implement a new feature without going through th
 
 ## Bug report
 
-First of all please [search existing issues](https://github.com/ponylang/net-sll/issues) to make sure your issue hasn't already been reported. If you cannot find a suitable issue — [create a new one](https://github.com/ponylang/net-sll/issues/new).
+First of all please [search existing issues](https://github.com/ponylang/net-ssl/issues) to make sure your issue hasn't already been reported. If you cannot find a suitable issue — [create a new one](https://github.com/ponylang/net-ssl/issues/new).
 
 Provide the following details:
 
