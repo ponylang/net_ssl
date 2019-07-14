@@ -1,5 +1,5 @@
-use "net"
 use "collections"
+use "net"
 
 primitive _X509Name
 primitive _GeneralName
@@ -22,26 +22,20 @@ primitive X509
     Get the common name for the certificate. Raises an error if the common name
     contains any NULL bytes.
     """
-    if cert.is_null() then
-      error
-    end
+    if cert.is_null() then error end
 
     let subject = @X509_get_subject_name[Pointer[_X509Name]](cert)
     let len =
       @X509_NAME_get_text_by_NID[I32](subject, I32(13), Pointer[U8], I32(0))
 
-    if len < 0 then
-      error
-    end
+    if len < 0 then error end
 
     let common = recover String(len.usize()) end
-    @X509_NAME_get_text_by_NID[I32](subject, I32(13), common.cstring(),
-      len + 1)
+    @X509_NAME_get_text_by_NID[I32](
+      subject, I32(13), common.cstring(), len + 1)
     common.recalc()
 
-    if common.size() != len.usize() then
-      error
-    end
+    if common.size() != len.usize() then error end
 
     common
 
@@ -62,8 +56,8 @@ primitive X509
     end
 
     let stack =
-      @X509_get_ext_d2i[Pointer[_GeneralNameStack]](cert, I32(85),
-        Pointer[U8], Pointer[U8])
+      @X509_get_ext_d2i[Pointer[_GeneralNameStack]](
+        cert, I32(85), Pointer[U8], Pointer[U8])
 
     if stack.is_null() then
       return array
@@ -98,7 +92,7 @@ primitive X509
                   error
                 end
 
-                consume s
+                s
               end)
           end
         end

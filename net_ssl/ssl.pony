@@ -26,7 +26,7 @@ class SSL
   var _input: Pointer[_BIO] tag
   var _output: Pointer[_BIO] tag
   var _state: SSLState = SSLHandshake
-  var _read_buf: Array[U8] iso = recover Array[U8] end
+  var _read_buf: Array[U8] iso = []
 
   new _create(
     ctx: Pointer[_SSLContext] tag,
@@ -70,7 +70,7 @@ class SSL
       @SSL_set_connect_state[None](_ssl)
       @SSL_do_handshake[I32](_ssl)
     end
-  
+
   fun box alpn_selected(): (ALPNProtocolName | None) =>
     """
     Get the protocol identifier negotiated via ALPN
@@ -102,7 +102,7 @@ class SSL
 
     var len = if expect > 0 then
       if offset >= expect then
-        return _read_buf = recover Array[U8] end
+        return _read_buf = []
       end
 
       expect - offset
@@ -149,7 +149,7 @@ class SSL
     end
 
     if ready then
-      _read_buf = recover Array[U8] end
+      _read_buf = []
     else
       // try and read again any pending data that SSL hasn't decoded yet
       if @BIO_ctrl_pending[USize](_input) > 0 then
@@ -162,11 +162,7 @@ class SSL
           // https://mta.openssl.org/pipermail/openssl-users/2017-January/005110.html
           if @SSL_has_pending[I32](_ssl) == 1 then
             read(expect)
-          else
-            None
           end
-        else
-          None
         end
       end
     end
