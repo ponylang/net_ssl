@@ -48,7 +48,10 @@ class Listener is TCPListenNotify
   var _count: USize = 0
 
   new iso create(
-    sslctx: SSLContext, auth: AmbientAuth, out: OutStream, limit: USize)
+    sslctx: SSLContext,
+    auth: AmbientAuth,
+    out: OutStream,
+    limit: USize)
   =>
     _sslctx = sslctx
     _auth = auth
@@ -117,7 +120,10 @@ class ServerSide is TCPConnectionNotify
     end
 
   fun ref received(
-    conn: TCPConnection ref, data: Array[U8] iso, times: USize): Bool
+    conn: TCPConnection ref,
+    data: Array[U8] iso,
+    times: USize)
+    : Bool
   =>
     _out.print(consume data)
     conn.dispose()
