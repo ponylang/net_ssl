@@ -70,8 +70,9 @@ workflows:
     jobs:
       - release-vs-ponyc-release-openssl-098
       - debug-vs-ponyc-release-openssl-098
-      - release-vs-ponyc-release-openssl-110
-      - debug-vs-ponyc-release-openssl-110
+      # temporarily against master until a bug is fixed in next release of ponyc
+      - release-vs-ponyc-master-openssl-110
+      - debug-vs-ponyc-master-openssl-110
   nightly:
     triggers:
       - schedule:
