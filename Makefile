@@ -23,7 +23,7 @@ ifdef ssl
 endif
 
 ifeq ($(ssl), 1.1.x)
-	SSL = -Dopenssl_1.1.x
+	SSL = -Dopenssl_1.1.0
 else
 	SSL = -Dopenssl_0.9.0
 endif
