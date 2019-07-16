@@ -6,7 +6,7 @@ jobs:
     steps:
       - checkout
       - run: bash .ci-scripts/install-openssl-0.9.8.bash
-      - run: make test config=release -Dopenssl_0.9.0
+      - run: make test config=release ssl=0.9.0
 
   debug-vs-ponyc-release-openssl-098:
     docker:
@@ -14,7 +14,7 @@ jobs:
     steps:
       - checkout
       - run: bash .ci-scripts/install-openssl-0.9.8.bash
-      - run: make test config=debug -Dopenssl_0.9.0
+      - run: make test config=debug ssl=0.9.0
 
   release-vs-ponyc-master-openssl-098:
     docker:
@@ -22,7 +22,7 @@ jobs:
     steps:
       - checkout
       - run: bash .ci-scripts/install-openssl-0.9.8.bash
-      - run: make test config=release -Dopenssl_0.9.0
+      - run: make test config=release ssl=0.9.0
 
   debug-vs-ponyc-master-openssl-098:
     docker:
@@ -30,7 +30,7 @@ jobs:
     steps:
       - checkout
       - run: bash .ci-scripts/install-openssl-0.9.8.bash
-      - run: make test config=debug -Dopenssl_0.9.0
+      - run: make test config=debug ssl=0.9.0
 
   release-vs-ponyc-release-openssl-110:
     docker:
@@ -38,7 +38,7 @@ jobs:
     steps:
       - checkout
       - run: bash .ci-scripts/install-openssl-1.1.0.bash
-      - run: make test config=release -Dopenssl_1.1.x
+      - run: make test config=release ssl=1.1.x
 
   debug-vs-ponyc-release-openssl-110:
     docker:
@@ -46,7 +46,7 @@ jobs:
     steps:
       - checkout
       - run: bash .ci-scripts/install-openssl-1.1.0.bash
-      - run: make test config=debug -Dopenssl_1.1.x
+      - run: make test config=debug ssl=1.1.x
 
   release-vs-ponyc-master-openssl-110:
     docker:
@@ -54,7 +54,7 @@ jobs:
     steps:
       - checkout
       - run: bash .ci-scripts/install-openssl-1.1.0.bash
-      - run: make test config=release -Dopenssl_1.1.x
+      - run: make test config=release ssl=1.1.x
 
   debug-vs-ponyc-master-openssl-110:
     docker:
@@ -62,7 +62,7 @@ jobs:
     steps:
       - checkout
       - run: bash .ci-scripts/install-openssl-1.1.0.bash
-      - run: make test config=debug -Dopenssl_1.1.x
+      - run: make test config=debug ssl=1.1.x
 
 workflows:
   version: 2
