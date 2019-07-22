@@ -1,8 +1,7 @@
 use "net"
 
 interface ALPNProtocolNotify
-  fun ref alpn_negotiated(
-    conn: TCPConnection ref, protocol: (String | None)): None
+  fun ref alpn_negotiated(conn: TCPConnection, protocol: (String | None)): None
 
 type ALPNProtocolName is String val
 primitive ALPNFatal

@@ -9,7 +9,8 @@ actor Main
     let limit = try env.args(1)?.usize()? else 1 end
 
     let auth =
-      try env.root as AmbientAuth
+      try
+        env.root as AmbientAuth
       else
         env.out.print("unable to use the network")
         return
@@ -157,7 +158,10 @@ class ClientSide is TCPConnectionNotify
     _out.print("connect failed")
 
   fun ref received(
-    conn: TCPConnection ref, data: Array[U8] iso, times: USize): Bool
+    conn: TCPConnection ref,
+    data: Array[U8] iso,
+    times: USize)
+    : Bool
   =>
     _out.print(consume data)
     true
