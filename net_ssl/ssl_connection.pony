@@ -146,7 +146,7 @@ class SSLConnection is TCPConnectionNotify
 
         match _notify
         | let alpn_notify: ALPNProtocolNotify =>
-        alpn_notify.alpn_negotiated(conn, _ssl.alpn_selected())
+          alpn_notify.alpn_negotiated(conn, _ssl.alpn_selected())
         end
 
         try
@@ -179,7 +179,8 @@ class SSLConnection is TCPConnectionNotify
 
         if r isnt None then
           received_called = received_called + 1
-          _notify.received(conn,
+          _notify.received(
+            conn,
             (consume r) as Array[U8] iso^,
             received_called)
         else

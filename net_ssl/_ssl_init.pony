@@ -21,8 +21,9 @@ primitive _SSLInit
   fun _init() =>
     ifdef "openssl_1.1.x" then
       let settings = @OPENSSL_INIT_new()
-      @OPENSSL_init_ssl(_OpenSslInitLoadSslStrings.apply()
-          + _OpenSslInitLoadCryptoStrings.apply(), settings)
+      @OPENSSL_init_ssl(
+        _OpenSslInitLoadSslStrings() + _OpenSslInitLoadCryptoStrings(),
+        settings)
       @OPENSSL_INIT_free(settings)
     else
       @SSL_load_error_strings[None]()

@@ -1,7 +1,7 @@
 use "net"
 
 interface ALPNProtocolNotify
-  fun ref alpn_negotiated(conn: TCPConnection ref, protocol: (String val | None)): None
+  fun ref alpn_negotiated(conn: TCPConnection, protocol: (String | None)): None
 
 type ALPNProtocolName is String val
 primitive ALPNFatal
@@ -23,7 +23,10 @@ class val ALPNStandardProtocolResolver is ALPNProtocolResolver
   let supported: Array[ALPNProtocolName] val
   let use_client_as_fallback: Bool
 
-  new val create(supported': Array[ALPNProtocolName] val, use_client_as_fallback': Bool = true) =>
+  new val create(
+    supported': Array[ALPNProtocolName] val,
+    use_client_as_fallback': Bool = true)
+  =>
     supported = supported'
     use_client_as_fallback = use_client_as_fallback'
 
@@ -34,7 +37,7 @@ class val ALPNStandardProtocolResolver is ALPNProtocolResolver
       end
     end
     if use_client_as_fallback then
-      try return advertised.apply(0)? end
+      try return advertised(0)? end
     end
 
     ALPNWarning
@@ -46,7 +49,7 @@ primitive _ALPNMatchResultCode
   fun no_ack(): I32 => 3
 
 primitive _ALPNProtocolList
-  fun from_array(protocols: Array[String] box): String val ? =>
+  fun from_array(protocols: Array[String] box): String ? =>
     """
     Try to pack the protocol names in `protocols` into a *protocol name list*
     """
@@ -64,8 +67,8 @@ primitive _ALPNProtocolList
       list.append(proto)
     end
 
-    consume val list
-  
+    list
+
   fun to_array(protocol_list: String box): Array[ALPNProtocolName] val ? =>
     """
     Try to unpack a *protocol name list* into an `Array[String]`
@@ -73,25 +76,25 @@ primitive _ALPNProtocolList
     let arr = recover trn Array[ALPNProtocolName] end
 
     var index = USize(1)
-    var remain = try protocol_list.apply(0)? else error end
-    var buf: String trn = recover trn String end
+    var remain = try protocol_list(0)? else error end
+    var buf = recover trn String end
 
     if remain == 0 then error end
 
     while index < protocol_list.size() do
-      let ch = try protocol_list.apply(index)? else error end
+      let ch = try protocol_list(index)? else error end
       if remain > 0 then
         buf.push(ch)
         remain = remain - 1
       end
-      
+
       if remain == 0 then
-        let final_protocol: String val = buf = recover trn String end
+        let final_protocol: String = buf = recover String end
         arr.push(final_protocol)
 
         let hasNextChar = index < (protocol_list.size() - 1)
         if hasNextChar then
-          remain = try protocol_list.apply(index + 1)? else error end
+          remain = try protocol_list(index + 1)? else error end
           if remain == 0 then error end
           index = index + 1
         end
@@ -100,4 +103,4 @@ primitive _ALPNProtocolList
     end
 
     if remain > 0 then error end
-    consume val arr
+    arr

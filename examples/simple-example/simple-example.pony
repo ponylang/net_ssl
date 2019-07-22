@@ -6,39 +6,38 @@ use "../../net_ssl"
 
 actor Main
   new create(env: Env) =>
-    let ssl = true
-    let limit = try
-      env.args(1)?.usize()?
-    else
-      1
-    end
+    let limit = try env.args(1)?.usize()? else 1 end
 
-    try
-      let auth = env.root as AmbientAuth
-      let sslctx: (SSLContext | None) = 
-        try
-          recover
-            // paths need to be adjusted to a absolute location or you need to run the example
-            // from a location where this relative path will be valid
-            SSLContext
-              .>set_authority(FilePath(auth, "../../examples/simple-example/cert.pem")?)?
-              .>set_cert(
-                FilePath(auth, "../../examples/simple-example/cert.pem")?,
-                FilePath(auth, "../../examples/simple-example/key.pem")?)?
-              .>set_client_verify(true)
-              .>set_server_verify(true)
-          end
+    let auth =
+      try
+        env.root as AmbientAuth
+      else
+        env.out.print("unable to use the network")
+        return
       end
 
-      match sslctx
-      | let ctx: SSLContext val =>
-        TCPListener(auth, recover Listener(ctx, auth, env.out, limit) end)
+    let sslctx =
+      try
+        // paths need to be adjusted to a absolute location or you need to run
+        // the example from a location where this relative path will be valid
+        recover
+          SSLContext
+            .> set_authority(
+              FilePath(auth, "../../examples/simple-example/cert.pem")?)?
+            .> set_cert(
+              FilePath(auth, "../../examples/simple-example/cert.pem")?,
+              FilePath(auth, "../../examples/simple-example/key.pem")?)?
+            .> set_client_verify(true)
+            .> set_server_verify(true)
+        end
       else
         env.out.print("unable to set up SSL authentication")
+        return
       end
-    else
-      env.out.print("unable to use the network")
-    end
+
+    TCPListener(
+      auth,
+      Listener(consume sslctx, auth, env.out, limit))
 
 class Listener is TCPListenNotify
   let _sslctx: SSLContext
@@ -49,7 +48,12 @@ class Listener is TCPListenNotify
   var _service: String = ""
   var _count: USize = 0
 
-  new create(sslctx: SSLContext, auth: AmbientAuth, out: OutStream, limit: USize) =>
+  new iso create(
+    sslctx: SSLContext,
+    auth: AmbientAuth,
+    out: OutStream,
+    limit: USize)
+  =>
     _sslctx = sslctx
     _auth = auth
     _out = out
@@ -93,8 +97,11 @@ class Listener is TCPListenNotify
 
     try
       _out.print("client starting")
-      let ssl = _sslctx.client()?
-      TCPConnection(_auth, SSLConnection(ClientSide(_out), consume ssl), _host, _service)
+      TCPConnection(
+        _auth,
+        SSLConnection(ClientSide(_out), _sslctx.client()?),
+        _host,
+        _service)
     else
       _out.print("couldn't create client side")
       listen.close()
@@ -113,8 +120,11 @@ class ServerSide is TCPConnectionNotify
       conn.write("server says hi")
     end
 
-  fun ref received(conn: TCPConnection ref, data: Array[U8] iso,
-    times: USize): Bool
+  fun ref received(
+    conn: TCPConnection ref,
+    data: Array[U8] iso,
+    times: USize)
+    : Bool
   =>
     _out.print(consume data)
     conn.dispose()
@@ -147,8 +157,11 @@ class ClientSide is TCPConnectionNotify
   fun ref connect_failed(conn: TCPConnection ref) =>
     _out.print("connect failed")
 
-  fun ref received(conn: TCPConnection ref, data: Array[U8] iso,
-    times: USize): Bool
+  fun ref received(
+    conn: TCPConnection ref,
+    data: Array[U8] iso,
+    times: USize)
+    : Bool
   =>
     _out.print(consume data)
     true

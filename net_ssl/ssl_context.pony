@@ -15,8 +15,8 @@ use @SSL_CTX_set_options[ULong](ctx: Pointer[_SSLContext] tag, opts: ULong)
 
 primitive _SSLContext
 
-primitive _SslCtrlSetOptions                fun val apply(): I32 => 32
-primitive _SslCtrlClearOptions              fun val apply(): I32 => 77
+primitive _SslCtrlSetOptions   fun val apply(): I32 => 32
+primitive _SslCtrlClearOptions fun val apply(): I32 => 77
 
 // These are the SSL_OP_NO_{SSL|TLS}vx{_x} in ssl.h.
 // Since Pony doesn't allow underscore we use camel case
@@ -24,24 +24,25 @@ primitive _SslCtrlClearOptions              fun val apply(): I32 => 77
 // Also, in the version strings the "v" becomes "V" and
 // the underscore "_" becomes "u". So SSL_OP_NO_TLSv1_2
 // _SslOpNo_TlsV1u2.
-primitive _SslOpNoSslV2    fun val apply(): ULong =>    0x01000000 // 0 in 1.1
-primitive _SslOpNoSslV3    fun val apply(): ULong =>    0x02000000
-primitive _SslOpNoTlsV1    fun val apply(): ULong =>    0x04000000
-primitive _SslOpNoTlsV1u2  fun val apply(): ULong =>    0x08000000
-primitive _SslOpNoTlsV1u1  fun val apply(): ULong =>    0x10000000
-primitive _SslOpNoTlsV1u3  fun val apply(): ULong =>    0x20000000
+primitive _SslOpNoSslV2    fun val apply(): ULong => 0x01000000 // 0 in 1.1
+primitive _SslOpNoSslV3    fun val apply(): ULong => 0x02000000
+primitive _SslOpNoTlsV1    fun val apply(): ULong => 0x04000000
+primitive _SslOpNoTlsV1u2  fun val apply(): ULong => 0x08000000
+primitive _SslOpNoTlsV1u1  fun val apply(): ULong => 0x10000000
+primitive _SslOpNoTlsV1u3  fun val apply(): ULong => 0x20000000
 
-primitive _SslOpNoDtlsV1   fun val apply(): ULong =>    0x04000000
-primitive _SslOpNoDtlsV1u2 fun val apply(): ULong =>    0x08000000
+primitive _SslOpNoDtlsV1   fun val apply(): ULong => 0x04000000
+primitive _SslOpNoDtlsV1u2 fun val apply(): ULong => 0x08000000
 
 // Defined as SSL_OP_NO_SSL_MASK in ssl.h
-primitive _SslOpNoSslMask fun val apply(): ULong =>
-    (_SslOpNoSslV3.apply() + _SslOpNoTlsV1.apply() + _SslOpNoTlsV1u1.apply()
-      + _SslOpNoTlsV1u2.apply() + _SslOpNoTlsV1u3.apply())
+primitive _SslOpNoSslMask
+  fun val apply(): ULong =>
+    _SslOpNoSslV3() + _SslOpNoTlsV1() + _SslOpNoTlsV1u1() + _SslOpNoTlsV1u2()
+      + _SslOpNoTlsV1u3()
 
 // Defined as SSL_OP_NO_DTLS_MASK in ssl.h
-primitive _SslOpNoDtlsMask fun val apply(): ULong =>
-    (_SslOpNoDtlsV1.apply() + _SslOpNoDtlsV1u2.apply())
+primitive _SslOpNoDtlsMask
+  fun val apply(): ULong => _SslOpNoDtlsV1() + _SslOpNoDtlsV1u2()
 
 class val SSLContext
   """
@@ -60,14 +61,14 @@ class val SSLContext
 
       // Allow only newer ciphers.
       try
-        set_min_proto_version(Tls1u2Version.apply())?
-        set_max_proto_version(SslAutoVersion.apply())?
+        set_min_proto_version(Tls1u2Version())?
+        set_max_proto_version(SslAutoVersion())?
       end
     else
       _ctx = @SSL_CTX_new(@SSLv23_method())
 
       // Disable "all" SSL/TSL options
-      _set_options(_SslOpNoSslMask.apply() + _SslOpNoSslV2.apply())
+      _set_options(_SslOpNoSslMask() + _SslOpNoSslV2())
 
       // Allow only newer ciphers
       allow_tls_v1_2(true)
@@ -77,14 +78,14 @@ class val SSLContext
     ifdef "openssl_1.1.x" then
       @SSL_CTX_set_options(_ctx, opts)
     else
-      @SSL_CTX_ctrl(_ctx, _SslCtrlSetOptions.apply(), opts, Pointer[None])
+      @SSL_CTX_ctrl(_ctx, _SslCtrlSetOptions(), opts, Pointer[None])
     end
 
   fun _clear_options(opts: ULong) =>
     ifdef "openssl_1.1.x" then
       @SSL_CTX_clear_options(_ctx, opts)
     else
-      @SSL_CTX_ctrl(_ctx, _SslCtrlClearOptions.apply(), opts, Pointer[None])
+      @SSL_CTX_ctrl(_ctx, _SslCtrlClearOptions(), opts, Pointer[None])
     end
 
   fun client(hostname: String = ""): SSL iso^ ? =>
@@ -188,8 +189,8 @@ class val SSLContext
                         Tls1u2Version, Tls1u3Version, Dtls1Version,
                         Dtls1u2Version
     """
-    let result = @SSL_CTX_ctrl(_ctx, _SslCtrlSetMinProtoVersion.apply(),
-        version, Pointer[None])
+    let result =
+      @SSL_CTX_ctrl(_ctx, _SslCtrlSetMinProtoVersion(), version, Pointer[None])
     if result == 0 then
       error
     end
@@ -203,7 +204,7 @@ class val SSLContext
                         Tls1u2Version, Tls1u3Version, Dtls1Version,
                         Dtls1u2Version
     """
-    @SSL_CTX_ctrl(_ctx, _SslCtrlGetMinProtoVersion.apply(), 0, Pointer[None])
+    @SSL_CTX_ctrl(_ctx, _SslCtrlGetMinProtoVersion(), 0, Pointer[None])
 
   fun ref set_max_proto_version(version: ULong) ? =>
     """
@@ -214,8 +215,8 @@ class val SSLContext
                         Tls1u2Version, Tls1u3Version, Dtls1Version,
                         Dtls1u2Version
     """
-    let result = @SSL_CTX_ctrl(_ctx, _SslCtrlSetMaxProtoVersion.apply(),
-        version, Pointer[None])
+    let result =
+      @SSL_CTX_ctrl(_ctx, _SslCtrlSetMaxProtoVersion(), version, Pointer[None])
     if result == 0 then
       error
     end
@@ -229,7 +230,7 @@ class val SSLContext
                         Tls1u2Version, Tls1u3Version, Dtls1Version,
                         Dtls1u2Version
     """
-    @SSL_CTX_ctrl(_ctx, _SslCtrlGetMaxProtoVersion.apply(), 0, Pointer[None])
+    @SSL_CTX_ctrl(_ctx, _SslCtrlGetMaxProtoVersion(), 0, Pointer[None])
 
   fun ref alpn_set_resolver(resolver: ALPNProtocolResolver box): Bool =>
     """
@@ -239,12 +240,13 @@ class val SSLContext
     Requires OpenSSL >= 1.0.2
     """
     ifdef "openssl_1.1.x" then
-      @SSL_CTX_set_alpn_select_cb[None](_ctx, addressof SSLContext._alpn_select_cb, resolver)
+      @SSL_CTX_set_alpn_select_cb[None](
+        _ctx, addressof SSLContext._alpn_select_cb, resolver)
       return true
     end
 
     false
-  
+
   fun ref alpn_set_client_protocols(protocols: Array[String] box): Bool =>
     """
     Configures the SSLContext to advertise the protocol names defined in `protocols` when connecting to a server
@@ -256,28 +258,30 @@ class val SSLContext
     ifdef "openssl_1.1.x" then
       try
         let proto_list = _ALPNProtocolList.from_array(protocols)?
-        let result = @SSL_CTX_set_alpn_protos[I32](_ctx, proto_list.cpointer(), proto_list.size())
+        let result =
+          @SSL_CTX_set_alpn_protos[I32](
+            _ctx, proto_list.cpointer(), proto_list.size())
         return result == 0
       end
     end
 
     false
-  
+
   fun @_alpn_select_cb(
     ssl: Pointer[_SSL] tag,
     out: Pointer[Pointer[U8] tag] tag,
     outlen: Pointer[U8] tag,
     inptr: Pointer[U8] box,
-    inlen: U32 val,
+    inlen: U32,
     resolver: ALPNProtocolResolver box)
-    : I32 val
+    : I32
   =>
     let proto_arr_str = String.copy_cpointer(inptr, USize.from[U32](inlen))
     try
       let proto_arr = _ALPNProtocolList.to_array(proto_arr_str)?
 
       match resolver.resolve(proto_arr)
-      | let matched: String val =>
+      | let matched: String =>
       var size = matched.size()
       if (size > 0) and (size <= 255) then
         var ptr = matched.cpointer()
@@ -302,9 +306,9 @@ class val SSLContext
     """
     if not _ctx.is_null() then
       if state then
-        _clear_options(_SslOpNoTlsV1.apply())
+        _clear_options(_SslOpNoTlsV1())
       else
-        _set_options(_SslOpNoTlsV1.apply())
+        _set_options(_SslOpNoTlsV1())
       end
     end
 
@@ -315,9 +319,9 @@ class val SSLContext
     """
     if not _ctx.is_null() then
       if state then
-        _clear_options(_SslOpNoTlsV1u1.apply())
+        _clear_options(_SslOpNoTlsV1u1())
       else
-        _set_options(_SslOpNoTlsV1u1.apply())
+        _set_options(_SslOpNoTlsV1u1())
       end
     end
 
@@ -328,9 +332,9 @@ class val SSLContext
     """
     if not _ctx.is_null() then
       if state then
-        _clear_options(_SslOpNoTlsV1u2.apply())
+        _clear_options(_SslOpNoTlsV1u2())
       else
-        _set_options(_SslOpNoTlsV1u2.apply())
+        _set_options(_SslOpNoTlsV1u2())
       end
     end
 
