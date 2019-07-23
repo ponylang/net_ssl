@@ -16,12 +16,12 @@ actor Main
             // paths need to be adjusted to a absolute location or you need to run the example
             // from a location where this relative path will be valid
             SSLContext
-              .>set_authority(FilePath(auth, "assets/cert.pem")?)?
-              .>set_cert(
+              .> set_authority(FilePath(auth, "assets/cert.pem")?)?
+              .> set_cert(
                 FilePath(auth, "assets/cert.pem")?,
                 FilePath(auth, "assets/key.pem")?)?
-              .>set_client_verify(true)
-              .>set_server_verify(true)
+              .> set_client_verify(true)
+              .> set_server_verify(true)
           end
       end
 
