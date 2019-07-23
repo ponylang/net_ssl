@@ -25,10 +25,12 @@ primitive _SSLInit
         _OpenSslInitLoadSslStrings() + _OpenSslInitLoadCryptoStrings(),
         settings)
       @OPENSSL_INIT_free(settings)
-    else
+    elseif "openssl_0.9.0" then
       @SSL_load_error_strings[None]()
       @SSL_library_init[I32]()
       let cb =
         @ponyint_ssl_multithreading[Pointer[U8]](@CRYPTO_num_locks[I32]())
       @CRYPTO_set_locking_callback[None](cb)
+    else
+      compile_error "You must select an SSL version to use."
     end
