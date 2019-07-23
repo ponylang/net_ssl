@@ -66,8 +66,10 @@ primitive X509
     var name =
       ifdef "openssl_1.1.x" then
         @OPENSSL_sk_pop[Pointer[_GeneralName]](stack)
-      else
+      elseif "openssl_0.9.0" then
         @sk_pop[Pointer[_GeneralName]](stack)
+      else
+        compile_error "You must select an SSL version to use."
       end
 
     while not name.is_null() do
@@ -110,15 +112,19 @@ primitive X509
       @GENERAL_NAME_free[None](name)
       ifdef "openssl_1.1.x" then
         name = @OPENSSL_sk_pop[Pointer[_GeneralName]](stack)
-      else
+      elseif "openssl_0.9.0" then
         name = @sk_pop[Pointer[_GeneralName]](stack)
+      else
+        compile_error "You must select an SSL version to use."
       end
     end
 
     ifdef "openssl_1.1.x" then
       @OPENSSL_sk_free[None](stack)
-    else
+    elseif "openssl_0.9.0" then
       @sk_free[None](stack)
+    else
+      compile_error "You must select an SSL version to use."
     end
     array
 

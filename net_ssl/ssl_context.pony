@@ -64,7 +64,7 @@ class val SSLContext
         set_min_proto_version(Tls1u2Version())?
         set_max_proto_version(SslAutoVersion())?
       end
-    else
+    elseif "openssl_0.9.0" then
       _ctx = @SSL_CTX_new(@SSLv23_method())
 
       // Disable "all" SSL/TSL options
@@ -72,20 +72,26 @@ class val SSLContext
 
       // Allow only newer ciphers
       allow_tls_v1_2(true)
+    else
+      compile_error "You must select an SSL version to use."
     end
 
   fun _set_options(opts: ULong) =>
     ifdef "openssl_1.1.x" then
       @SSL_CTX_set_options(_ctx, opts)
-    else
+    elseif "openssl_0.9.0" then
       @SSL_CTX_ctrl(_ctx, _SslCtrlSetOptions(), opts, Pointer[None])
+    else
+      compile_error "You must select an SSL version to use."
     end
 
   fun _clear_options(opts: ULong) =>
     ifdef "openssl_1.1.x" then
       @SSL_CTX_clear_options(_ctx, opts)
-    else
+    elseif "openssl_0.9.0" then
       @SSL_CTX_ctrl(_ctx, _SslCtrlClearOptions(), opts, Pointer[None])
+    else
+      compile_error "You must select an SSL version to use."
     end
 
   fun client(hostname: String = ""): SSL iso^ ? =>
@@ -243,9 +249,11 @@ class val SSLContext
       @SSL_CTX_set_alpn_select_cb[None](
         _ctx, addressof SSLContext._alpn_select_cb, resolver)
       return true
+    elseif "openssl_0.9.0" then
+      return false
+    else
+      compile_error "You must select an SSL version to use."
     end
-
-    false
 
   fun ref alpn_set_client_protocols(protocols: Array[String] box): Bool =>
     """
@@ -263,6 +271,10 @@ class val SSLContext
             _ctx, proto_list.cpointer(), proto_list.size())
         return result == 0
       end
+    elseif "openssl_0.9.0" then
+      return false
+    else
+      compile_error "You must select an SSL version to use."
     end
 
     false

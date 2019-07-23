@@ -16,16 +16,12 @@ else
 	PONYC = ponyc --debug
 endif
 
-ifdef ssl
-	ifeq (,$(filter $(ssl), 1.1.x 0.9.0))
-		$(error Unknown ssl version "$(ssl)")
-	endif
-endif
-
 ifeq ($(ssl), 1.1.x)
 	SSL = -Dopenssl_1.1.x
-else
+else ifeq ($(ssl), 0.9.0)
 	SSL = -Dopenssl_0.9.0
+else
+  $(error Unknown SSL version "$(ssl)". Must set using 'ssl=FOO')
 endif
 
 SOURCE_FILES := $(shell find $(SRC_DIR) -name \*.pony)
