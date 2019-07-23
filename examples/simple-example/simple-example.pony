@@ -23,10 +23,10 @@ actor Main
         recover
           SSLContext
             .> set_authority(
-              FilePath(auth, "../../examples/simple-example/cert.pem")?)?
+              FilePath(auth, "assets/cert.pem")?)?
             .> set_cert(
-              FilePath(auth, "../../examples/simple-example/cert.pem")?,
-              FilePath(auth, "../../examples/simple-example/key.pem")?)?
+              FilePath(auth, "assets/cert.pem")?,
+              FilePath(auth, "assets/key.pem")?)?
             .> set_client_verify(true)
             .> set_server_verify(true)
         end
