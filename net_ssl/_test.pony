@@ -640,17 +640,19 @@ primitive _TestSSLContext
         error
       end
 
-    let ssl_client = try
-      sslctx.client()?
-    else
-      h.fail("failed getting ssl client session")
-      error
-    end
-    let ssl_server = try
-      sslctx.server()?
-    else
-      h.fail("failed getting ssl server session")
-      error
-    end
+    let ssl_client =
+      try
+        sslctx.client()?
+      else
+        h.fail("failed getting ssl client session")
+        error
+      end
+    let ssl_server =
+      try
+        sslctx.server()?
+      else
+        h.fail("failed getting ssl server session")
+        error
+      end
 
     (consume ssl_client, consume ssl_server)
