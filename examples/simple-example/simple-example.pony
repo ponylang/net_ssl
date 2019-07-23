@@ -8,21 +8,12 @@ actor Main
   new create(env: Env) =>
     let limit = try env.args(1)?.usize()? else 1 end
 
-    try
-      let auth = env.root as AmbientAuth
-      let sslctx: (SSLContext | None) =
-        try
-          recover
-            // paths need to be adjusted to a absolute location or you need to run the example
-            // from a location where this relative path will be valid
-            SSLContext
-              .> set_authority(FilePath(auth, "assets/cert.pem")?)?
-              .> set_cert(
-                FilePath(auth, "assets/cert.pem")?,
-                FilePath(auth, "assets/key.pem")?)?
-              .> set_client_verify(true)
-              .> set_server_verify(true)
-          end
+    let auth =
+      try
+        env.root as AmbientAuth
+      else
+        env.out.print("unable to use the network")
+        return
       end
 
     let sslctx =
