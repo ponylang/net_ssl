@@ -1,20 +1,32 @@
-version: 2
+version: 2.1
+
+orbs:
+  zulip: ponylang/zulip@1.0.0
+
 jobs:
   release-vs-ponyc-release-openssl-098:
     docker:
       - image: ponylang/ponyc:release
     steps:
+      - run: apt-get update
+      - run: apt-get install -y curl
       - checkout
       - run: bash .ci-scripts/install-openssl-0.9.8.bash
       - run: make test config=release ssl=0.9.0
+      - zulip/status:
+          fail_only: true
 
   debug-vs-ponyc-release-openssl-098:
     docker:
       - image: ponylang/ponyc:release
     steps:
+      - run: apt-get update
+      - run: apt-get install -y curl
       - checkout
       - run: bash .ci-scripts/install-openssl-0.9.8.bash
       - run: make test config=debug ssl=0.9.0
+      - zulip/status:
+          fail_only: true
 
   release-vs-ponyc-master-openssl-098:
     docker:
@@ -23,6 +35,8 @@ jobs:
       - checkout
       - run: bash .ci-scripts/install-openssl-0.9.8.bash
       - run: make test config=release ssl=0.9.0
+      - zulip/status:
+          fail_only: true
 
   debug-vs-ponyc-master-openssl-098:
     docker:
@@ -31,22 +45,32 @@ jobs:
       - checkout
       - run: bash .ci-scripts/install-openssl-0.9.8.bash
       - run: make test config=debug ssl=0.9.0
+      - zulip/status:
+          fail_only: true
 
   release-vs-ponyc-release-openssl-110:
     docker:
       - image: ponylang/ponyc:release
     steps:
+      - run: apt-get update
+      - run: apt-get install -y curl
       - checkout
       - run: bash .ci-scripts/install-openssl-1.1.0.bash
       - run: make test config=release ssl=1.1.x
+      - zulip/status:
+          fail_only: true
 
   debug-vs-ponyc-release-openssl-110:
     docker:
       - image: ponylang/ponyc:release
     steps:
+      - run: apt-get update
+      - run: apt-get install -y curl
       - checkout
       - run: bash .ci-scripts/install-openssl-1.1.0.bash
       - run: make test config=debug ssl=1.1.x
+      - zulip/status:
+          fail_only: true
 
   release-vs-ponyc-master-openssl-110:
     docker:
@@ -55,6 +79,8 @@ jobs:
       - checkout
       - run: bash .ci-scripts/install-openssl-1.1.0.bash
       - run: make test config=release ssl=1.1.x
+      - zulip/status:
+          fail_only: true
 
   debug-vs-ponyc-master-openssl-110:
     docker:
@@ -63,16 +89,23 @@ jobs:
       - checkout
       - run: bash .ci-scripts/install-openssl-1.1.0.bash
       - run: make test config=debug ssl=1.1.x
+      - zulip/status:
+          fail_only: true
 
 workflows:
-  version: 2
+  version: 2.1
   commit:
     jobs:
-      - release-vs-ponyc-release-openssl-098
-      - debug-vs-ponyc-release-openssl-098
+      - release-vs-ponyc-release-openssl-098:
+          context: org-global
+      - debug-vs-ponyc-release-openssl-098:
+          context: org-global
       # temporarily against master until a bug is fixed in next release of ponyc
-      - release-vs-ponyc-master-openssl-110
-      - debug-vs-ponyc-master-openssl-110
+      - release-vs-ponyc-master-openssl-110:
+          context: org-global
+      - debug-vs-ponyc-master-openssl-110:
+          context: org-global
+
   nightly:
     triggers:
       - schedule:
@@ -81,7 +114,12 @@ workflows:
             branches:
               only: master
     jobs:
-      - release-vs-ponyc-master-openssl-098
-      - debug-vs-ponyc-master-openssl-098
-      - release-vs-ponyc-master-openssl-110
-      - debug-vs-ponyc-master-openssl-110
+      - release-vs-ponyc-master-openssl-098:
+          context: org-global
+      - debug-vs-ponyc-master-openssl-098:
+          context: org-global
+      - release-vs-ponyc-master-openssl-110:
+          context: org-global
+      - debug-vs-ponyc-master-openssl-110:
+          context: org-global
+
