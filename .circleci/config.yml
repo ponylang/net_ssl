@@ -8,8 +8,6 @@ jobs:
     docker:
       - image: ponylang/ponyc:release
     steps:
-      - run: apt-get update
-      - run: apt-get install -y curl
       - checkout
       - run: bash .ci-scripts/install-openssl-0.9.8.bash
       - run: make test config=release ssl=0.9.0
@@ -20,8 +18,6 @@ jobs:
     docker:
       - image: ponylang/ponyc:release
     steps:
-      - run: apt-get update
-      - run: apt-get install -y curl
       - checkout
       - run: bash .ci-scripts/install-openssl-0.9.8.bash
       - run: make test config=debug ssl=0.9.0
@@ -52,8 +48,6 @@ jobs:
     docker:
       - image: ponylang/ponyc:release
     steps:
-      - run: apt-get update
-      - run: apt-get install -y curl
       - checkout
       - run: bash .ci-scripts/install-openssl-1.1.0.bash
       - run: make test config=release ssl=1.1.x
@@ -64,8 +58,6 @@ jobs:
     docker:
       - image: ponylang/ponyc:release
     steps:
-      - run: apt-get update
-      - run: apt-get install -y curl
       - checkout
       - run: bash .ci-scripts/install-openssl-1.1.0.bash
       - run: make test config=debug ssl=1.1.x
