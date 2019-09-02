@@ -20,7 +20,7 @@ else
 	PONYC = ${COMPILE_WITH} --debug
 endif
 
-ifneq (,$(filter $(MAKECMDGOALS),test unit-tests build-examples))
+ifeq (,$(filter $(MAKECMDGOALS),clean docs realclean TAGS))
   ifeq ($(ssl), 1.1.x)
 	  SSL = -Dopenssl_1.1.x
   else ifeq ($(ssl), 0.9.0)
