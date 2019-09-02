@@ -92,7 +92,7 @@ lwip_url=$(echo "${result}" | jq -r '.[].url')
 if [ "$lwip_url" != "" ]
 then
   body="
-Version ${VERSION} of ssl has been released.
+Version ${VERSION} of net_ssl has been released.
 
 See the [release notes](https://github.com/ponylang/net-ssl/releases/tag/${VERSION}) for more details.
 "
@@ -125,7 +125,7 @@ else
 fi
 
 message="
-Version ${VERSION} of ssl has been released.
+Version ${VERSION} of net_ssl has been released.
 
 See the [release notes](https://github.com/ponylang/net-ssl/releases/tag/${VERSION}) for more details.
 "
@@ -134,5 +134,5 @@ curl -X POST https://ponylang.zulipchat.com/api/v1/messages \
   -u ${ZULIP_TOKEN} \
   -d "type=stream" \
   -d "to=announce" \
-  -d "topic=ssl" \
+  -d "topic=net_ssl" \
   -d "content=${message}"

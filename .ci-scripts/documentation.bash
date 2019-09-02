@@ -21,8 +21,8 @@ TAG=$1
 GITHUB_TOKEN=$2
 
 # Shouldn't need to touch these
-BUILD_DIR="build/ssl-docs"
-DOCS_DIR="${GEN_MD}/ssl/${TAG}"
+BUILD_DIR="build/net_ssl-docs"
+DOCS_DIR="${GEN_MD}/net_ssl/${TAG}"
 
 # Generated markdown repo
 echo "Cloning main.actor-package-markdown repo into ${GEN_MD}"
@@ -45,11 +45,11 @@ echo "Preparing to upload generated markdown content from ${GEN_MD}"
 echo "Git fiddling commences..."
 pushd "${GEN_MD}" || exit 1
 echo "Creating a branch for generated documentation..."
-branch_name="ssl-${TAG}"
+branch_name="net_ssl-${TAG}"
 git checkout -b "${branch_name}"
 echo "Adding content..."
 git add .
-git commit -m "Add docs for package: ssl version: ${TAG}"
+git commit -m "Add docs for package: net_ssl version: ${TAG}"
 echo "Uploading new generated markdown content..."
 git push --set-upstream origin "${branch_name}"
 echo "Generated markdown content has been uploaded!"
@@ -66,7 +66,7 @@ jsontemplate="
 "
 
 json=$(jq -n \
---arg title "ssl ${TAG}" \
+--arg title "net_ssl ${TAG}" \
 --arg incoming_repo_and_branch "${REPO_OWNER}:${branch_name}" \
 "${jsontemplate}")
 
