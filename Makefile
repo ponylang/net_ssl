@@ -1,8 +1,12 @@
 config ?= release
 
+PACKAGE := net_ssl
+COMPILE_WITH := ponyc
+
 BUILD_DIR ?= build/$(config)
-SRC_DIR ?= net_ssl
-tests_binary := $(BUILD_DIR)/net_ssl
+SRC_DIR ?= $(PACKAGE)
+tests_binary := $(BUILD_DIR)/$(PACKAGE)
+docs_dir := build/$(PACKAGE)-docs
 
 ifdef config
 	ifeq (,$(filter $(config),debug release))
@@ -11,9 +15,9 @@ ifdef config
 endif
 
 ifeq ($(config),release)
-	PONYC = ponyc
+	PONYC = ${COMPILE_WITH}
 else
-	PONYC = ponyc --debug
+	PONYC = ${COMPILE_WITH} --debug
 endif
 
 ifneq (,$(filter $(MAKECMDGOALS),test unit-tests build-examples))
@@ -44,6 +48,12 @@ clean:
 
 realclean:
 	rm -rf build
+
+$(docs_dir): $(GEN_FILES) $(SOURCE_FILES)
+	rm -rf $(docs_dir)
+	${PONYC} --docs-public --pass=docs --output build $(SRC_DIR)
+
+docs: $(docs_dir)
 
 TAGS:
 	ctags --recurse=yes $(SRC_DIR)
