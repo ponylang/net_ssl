@@ -10,85 +10,75 @@ jobs:
     steps:
       - checkout
       - run: changelog-tool verify
-      - zulip/status:
-          fail_only: true
 
   release-vs-ponyc-release-openssl-098:
     docker:
-      - image: ponylang/ponyc:release
+      - image: ponylang/shared-docker-ci-x86-64-unknown-linux-builder-with-ssl:release
     steps:
       - checkout
-      - run: bash .ci-scripts/install-openssl-0.9.8.bash
       - run: make test config=release ssl=0.9.0
       - zulip/status:
           fail_only: true
 
   release-vs-ponyc-master-openssl-098:
     docker:
-      - image: ponylang/ponyc:latest
+      - image: ponylang/shared-docker-ci-x86-64-unknown-linux-builder-with-ssl:latest
     steps:
       - checkout
-      - run: bash .ci-scripts/install-openssl-0.9.8.bash
       - run: make test config=release ssl=0.9.0
       - zulip/status:
           fail_only: true
 
   debug-vs-ponyc-release-openssl-098:
     docker:
-      - image: ponylang/ponyc:release
+      - image: ponylang/shared-docker-ci-x86-64-unknown-linux-builder-with-ssl:release
     steps:
       - checkout
-      - run: bash .ci-scripts/install-openssl-0.9.8.bash
       - run: make test config=debug ssl=0.9.0
       - zulip/status:
           fail_only: true
 
   debug-vs-ponyc-master-openssl-098:
     docker:
-      - image: ponylang/ponyc:latest
+      - image: ponylang/shared-docker-ci-x86-64-unknown-linux-builder-with-ssl:latest
     steps:
       - checkout
-      - run: bash .ci-scripts/install-openssl-0.9.8.bash
       - run: make test config=debug ssl=0.9.0
       - zulip/status:
           fail_only: true
 
   release-vs-ponyc-release-openssl-110:
     docker:
-      - image: ponylang/ponyc:release
+      - image: ponylang/net-ssl-ci-x86-64-unknown-linux-builder-with-openssl:release
     steps:
       - checkout
-      - run: bash .ci-scripts/install-openssl-1.1.0.bash
       - run: make test config=release ssl=1.1.x
       - zulip/status:
           fail_only: true
 
   release-vs-ponyc-master-openssl-110:
     docker:
-      - image: ponylang/ponyc:latest
+      - image: ponylang/net-ssl-ci-x86-64-unknown-linux-builder-with-openssl:latest
     steps:
       - checkout
-      - run: bash .ci-scripts/install-openssl-1.1.0.bash
       - run: make test config=release ssl=1.1.x
       - zulip/status:
           fail_only: true
 
   debug-vs-ponyc-release-openssl-110:
     docker:
-      - image: ponylang/ponyc:release
+      - image: ponylang/net-ssl-ci-x86-64-unknown-linux-builder-with-openssl:release
     steps:
       - checkout
-      - run: bash .ci-scripts/install-openssl-1.1.0.bash
       - run: make test config=debug ssl=1.1.x
       - zulip/status:
           fail_only: true
 
   debug-vs-ponyc-master-openssl-110:
     docker:
-      - image: ponylang/ponyc:latest
+      - image: ponylang/net-ssl-ci-x86-64-unknown-linux-builder-with-openssl:latest
     steps:
       - checkout
-      - run: bash .ci-scripts/install-openssl-1.1.0.bash
       - run: make test config=debug ssl=1.1.x
       - zulip/status:
           fail_only: true
