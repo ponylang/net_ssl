@@ -12,7 +12,7 @@ DOCKERFILE_DIR="$(dirname "$0")"
 # built from x86-64-unknown-linux-builder release tag
 FROM_TAG=release
 TAG_AS=release
-docker build --build-arg FROM_TAG="${FROM_TAG}" \
+docker build --pull --build-arg FROM_TAG="${FROM_TAG}" \
   -t ponylang/net-ssl-ci-x86-64-unknown-linux-builder-with-openssl:"${TAG_AS}" \
   "${DOCKERFILE_DIR}"
 docker push ponylang/net-ssl-ci-x86-64-unknown-linux-builder-with-openssl:"${TAG_AS}"
@@ -20,7 +20,7 @@ docker push ponylang/net-ssl-ci-x86-64-unknown-linux-builder-with-openssl:"${TAG
 # built from x86-64-unknown-linux-builder latest tag
 FROM_TAG=latest
 TAG_AS=latest
-docker build --build-arg FROM_TAG="${FROM_TAG}" \
+docker build --pull --build-arg FROM_TAG="${FROM_TAG}" \
   -t ponylang/net-ssl-ci-x86-64-unknown-linux-builder-with-openssl:"${TAG_AS}" \
   "${DOCKERFILE_DIR}"
 docker push ponylang/net-ssl-ci-x86-64-unknown-linux-builder-with-openssl:"${TAG_AS}"
