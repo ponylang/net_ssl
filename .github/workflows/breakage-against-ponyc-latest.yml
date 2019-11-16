@@ -1,0 +1,27 @@
+name: Nightly breakage against ponyc master
+
+on:
+  schedule:
+    - cron: "0 2 * * *"
+
+jobs:
+  1.1.x-vs-ponyc-latest:
+    name: 1.1.x with ponyc master
+    runs-on: ubuntu-latest
+    container:
+      image: ponylang/net-ssl-ci-x86-64-unknown-linux-builder-with-openssl:latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Test
+        run: make test config=debug ssl=1.1.x
+
+  0.9.0-vs-ponyc-latest:
+    name: 0.9.0 with ponyc master
+    runs-on: ubuntu-latest
+    container:
+      image: ponylang/shared-docker-ci-x86-64-unknown-linux-builder-with-ssl:latest
+    steps:
+      - uses: actions/checkout@v1
+      - name: Test
+        run: make test config=debug ssl=0.9.0
+
