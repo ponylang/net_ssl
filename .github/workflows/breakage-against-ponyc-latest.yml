@@ -5,7 +5,7 @@ on:
     - cron: "0 3 * * *"
 
 jobs:
-  1.1.x-vs-ponyc-latest:
+  test-1_1_x-vs-ponyc-latest:
     name: 1.1.x with ponyc master
     runs-on: ubuntu-latest
     container:
@@ -15,7 +15,7 @@ jobs:
       - name: Test
         run: make test config=debug ssl=1.1.x
 
-  0.9.0-vs-ponyc-latest:
+  test-0_9_0-vs-ponyc-latest:
     name: 0.9.0 with ponyc master
     runs-on: ubuntu-latest
     container:
