@@ -1,6 +1,6 @@
 # net-ssl
 
-Pony library that brings SSL networking support to Pony. Requires LibreSSL or OpenSSL. See installation for more details. 
+Pony library that brings SSL networking support to Pony. Requires LibreSSL or OpenSSL. See installation for more details.
 
 ## Status
 
@@ -14,10 +14,13 @@ Production ready.
 * Update your `bundle.json`
 
 ```json
-{ 
-  "type": "github",
-  "repo": "ponylang/net-ssl",
-  "tag": "1.0.0"
+{
+  "deps": [
+    { "type": "github",
+      "repo": "ponylang/net-ssl",
+      "tag": "1.0.0"
+    }
+  ]
 }
 ```
 
