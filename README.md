@@ -10,23 +10,11 @@ Production ready.
 
 ## Installation
 
-* Install [pony-stable](https://github.com/ponylang/pony-stable)
-* Update your `bundle.json`
-
-```json
-{
-  "deps": [
-    { "type": "github",
-      "repo": "ponylang/net-ssl",
-      "tag": "1.0.0"
-    }
-  ]
-}
-```
-
-* `stable fetch` to fetch your dependencies
+* Install [corral](https://github.com/ponylang/corral)
+* `corral add github.com/ponylang/net-ssl.git`
+* `corral fetch` to fetch your dependencies
 * `use "net_ssl"` to include this package
-* `stable env ponyc` to compile your application
+* `corral run -- ponyc` to compile your application
 
 ## Supported SSL versions
 
