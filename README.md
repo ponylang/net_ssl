@@ -1,4 +1,4 @@
-# net-ssl
+# net_ssl
 
 Pony library that brings SSL networking support to Pony. Requires LibreSSL or OpenSSL. See installation for more details.
 
