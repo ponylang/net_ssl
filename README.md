@@ -11,7 +11,7 @@ Production ready.
 ## Installation
 
 * Install [corral](https://github.com/ponylang/corral)
-* `corral add github.com/ponylang/net-ssl.git`
+* `corral add github.com/ponylang/net_ssl.git`
 * `corral fetch` to fetch your dependencies
 * `use "net_ssl"` to include this package
 * `corral run -- ponyc` to compile your application
@@ -36,7 +36,7 @@ stable env ponyc -Dopenssl_1.1.x
 
 ## Dependencies
 
-`net-ssl` requires either LibreSSL or OpenSSL in order to operate. You'll might need to install it within your environment of choice.
+`net_ssl` requires either LibreSSL or OpenSSL in order to operate. You'll might need to install it within your environment of choice.
 
 ### Installing on APT based Linux distributions
 
