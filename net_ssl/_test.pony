@@ -555,13 +555,9 @@ class _TestTCP is TCPListenNotify
     h.expect_action("client create")
     h.expect_action("server accept")
 
-    try
-      let auth = h.env.root as AmbientAuth
-      h.dispose_when_done(TCPListener(auth, consume this))
-      h.complete_action("server create")
-    else
-      h.fail_action("server create")
-    end
+    let auth = h.env.root
+    h.dispose_when_done(TCPListener(auth, consume this))
+    h.complete_action("server create")
 
     h.long_test(2_000_000_000)
 
@@ -572,7 +568,7 @@ class _TestTCP is TCPListenNotify
     _h.complete_action("server listen")
 
     try
-      let auth = _h.env.root as AmbientAuth
+      let auth = _h.env.root
       let notify = (_client_conn_notify = None) as TCPConnectionNotify iso^
       (let host, let port) = listen.local_address().name()?
       _h.dispose_when_done(TCPConnection(auth, consume notify, host, port))
@@ -625,7 +621,7 @@ primitive _TestSSLContext
   fun val apply(h: TestHelper): (SSL iso^, SSL iso^) ? =>
     let sslctx =
       try
-        let auth = h.env.root as AmbientAuth
+        let auth = h.env.root
         recover
           SSLContext
             .> set_authority(FilePath(auth, "assets/cert.pem")?)?
