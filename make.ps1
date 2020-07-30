@@ -51,7 +51,7 @@ if (($Version -eq "") -and (Test-Path -Path "$rootDir\VERSION"))
   $Version = (Get-Content "$rootDir\VERSION") + "-" + (& git 'rev-parse' '--short' '--verify' 'HEAD^')
 }
 
-$ponyArgs = "--define openssl_0.9.0 --path $srcDir"
+$ponyArgs = "--define openssl_0.9.0 --path $rootDir"
 
 Write-Host "Configuration:    $Config"
 Write-Host "Version:          $Version"
@@ -171,10 +171,10 @@ function BuildLibs
     if ($LastExitCode -ne 0) { Pop-Location; throw "Error building $libreSsl" }
     Pop-Location
 
-    # copy to the package dir (i.e. PONYPATH) for linking
-    Copy-Item -Force -Path "$libsDir/lib/crypto-46.lib" -Destination "$rootDir/$target/crypto.lib"
-    Copy-Item -Force -Path "$libsDir/lib/ssl-48.lib" -Destination "$rootDir/$target/ssl.lib"
-    Copy-Item -Force -Path "$libsDir/lib/tls-20.lib" -Destination "$rootDir/$target/tls.lib"
+    # copy to the root dir (i.e. PONYPATH) for linking
+    Copy-Item -Force -Path "$libsDir/lib/crypto-46.lib" -Destination "$rootDir/crypto.lib"
+    Copy-Item -Force -Path "$libsDir/lib/ssl-48.lib" -Destination "$rootDir/ssl.lib"
+    Copy-Item -Force -Path "$libsDir/lib/tls-20.lib" -Destination "$rootDir/tls.lib"
   }
 }
 
