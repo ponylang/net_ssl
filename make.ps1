@@ -163,17 +163,22 @@ function BuildLibs
     }
 
     # Write-Output "Building $libreSsl"
-    Push-Location $libreSslSrc
-    (Get-Content "$libreSslSrc\CMakeLists.txt").replace('add_definitions(-Dinline=__inline)', "add_definitions(-Dinline=__inline)`nadd_definitions(-DPATH_MAX=255)") | Set-Content "$libreSslSrc\CMakeLists.txt"
-    cmake.exe $libreSslSrc -G "Visual Studio 16 2019" -Thost=x64 -A x64 -DCMAKE_INSTALL_PREFIX="$libsDir"
-    if ($LastExitCode -ne 0) { Pop-Location; throw "Error configuring $libreSsl" }
-    cmake.exe --build . --target install --config "${(Get-Culture).TextInfo.ToTitleCase($config)}"
-    if ($LastExitCode -ne 0) { Pop-Location; throw "Error building $libreSsl" }
-    Pop-Location
+    $libreSslLib = Join-Path -Path $libsDir -ChildPath "lib/ssl-48.lib"
+
+    if (-not (Test-Path $libreSslLib))
+    {
+      Push-Location $libreSslSrc
+      (Get-Content "$libreSslSrc\CMakeLists.txt").replace('add_definitions(-Dinline=__inline)', "add_definitions(-Dinline=__inline)`nadd_definitions(-DPATH_MAX=255)") | Set-Content "$libreSslSrc\CMakeLists.txt"
+      cmake.exe $libreSslSrc -G "Visual Studio 16 2019" -Thost=x64 -A x64 -DCMAKE_INSTALL_PREFIX="$libsDir" -DCMAKE_BUILD_TYPE="Release"
+      if ($LastExitCode -ne 0) { Pop-Location; throw "Error configuring $libreSsl" }
+      cmake.exe --build . --target install --config Release
+      if ($LastExitCode -ne 0) { Pop-Location; throw "Error building $libreSsl" }
+      Pop-Location
+    }
 
     # copy to the root dir (i.e. PONYPATH) for linking
-    Copy-Item -Force -Path "$libsDir/lib/crypto-46.lib" -Destination "$rootDir/crypto.lib"
     Copy-Item -Force -Path "$libsDir/lib/ssl-48.lib" -Destination "$rootDir/ssl.lib"
+    Copy-Item -Force -Path "$libsDir/lib/crypto-46.lib" -Destination "$rootDir/crypto.lib"
     Copy-Item -Force -Path "$libsDir/lib/tls-20.lib" -Destination "$rootDir/tls.lib"
   }
 }
@@ -230,7 +235,11 @@ switch ($Command.ToLower())
   "distclean"
   {
     $distDir = Join-Path -Path $rootDir -ChildPath "build"
-    Remove-Item -Path $distDir -Recurse -Force
+    if (Test-Path $distDir)
+    {
+      Remove-Item -Path $distDir -Recurse -Force
+    }
+    Remove-Item -Path "*.lib" -Force
   }
 
   "install"
