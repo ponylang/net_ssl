@@ -147,7 +147,7 @@ function BuildLibs
 {
   $libreSsl = "libressl-3.2.0"
 
-  if (-not ((Test-Path "$buildDir/crypto.lib") -and (Test-Path "$buildDir/ssl.lib")))
+  if (-not ((Test-Path "$rootDir/crypto.lib") -and (Test-Path "$rootDir/ssl.lib")))
   {
     $libreSslSrc = Join-Path -Path $libsDir -ChildPath $libreSsl
 
