@@ -9,6 +9,7 @@ All notable changes to this library will be documented in this file. This projec
 
 ### Added
 
+- Make Windows installation easier ([PR #33](https://github.com/ponylang/net_ssl/pull/33))
 
 ### Changed
 
