@@ -85,7 +85,7 @@ primitive X509
             array.push(
               recover
                 // Build a String from the ASN1 data.
-                let data = @ASN1_STRING_data[Pointer[U8]](value)
+                let data = @ASN1_STRING_get0_data[Pointer[U8]](value)
                 let len = @ASN1_STRING_length[I32](value)
                 let s = String.copy_cstring(data)
 
@@ -103,7 +103,7 @@ primitive X509
         array.push(
           recover
             // Build a String from the ASN1 data.
-            let data = @ASN1_STRING_data[Pointer[U8]](value)
+            let data = @ASN1_STRING_get0_data[Pointer[U8]](value)
             let len = @ASN1_STRING_length[I32](value)
             String.from_cstring(@pony_os_ip_string[Pointer[U8]](data, len))
           end)
