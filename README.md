@@ -40,51 +40,51 @@ stable env ponyc -Dopenssl_1.1.x
 
 ### Installing on APT based Linux distributions
 
-```
+```bash
 sudo apt-get install -y libssl-dev
 ```
 
 ### Installing on Alpine Linux
 
-```
+```bash
 apk add --update libressl-dev
 ```
 
 ### Installing on Arch Linux
 
-```
+```bash
 pacman -S openssl
 
 ```
 
 ### Installing on macOS with Homebrew
 
-```
+```bash
 brew update
 brew install libressl
 ```
 
 #### Installing on macOS with MacPorts
 
-```
+```bash
 sudo port install libressl
 ```
 
 ### Installing on RPM based Linux distributions with dnf
 
-```
+```bash
 sudo dnf install openssl-devel
 ```
 
 ### Installing on RPM based Linux distributions with yum
 
-```
+```bash
 sudo yum install openssl-devel
 ```
 
 ### Installing on RPM based Linux distributions with zypper
 
-```
+```bash
 sudo zypper install libopenssl-devel
 ```
 
