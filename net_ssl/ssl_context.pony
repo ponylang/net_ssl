@@ -1,5 +1,8 @@
 use "files"
 
+use "lib:crypt32" if windows
+use "lib:cryptui" if windows
+
 use @SSL_CTX_ctrl[ILong](
   ctx: Pointer[_SSLContext] tag,
   op: I32,
@@ -138,20 +141,70 @@ class val SSLContext
     Use a PEM file and/or a directory of PEM files to specify certificate
     authorities. Clients must set this. For servers, it is optional. Use None
     to indicate no file or no path. Raises an error if these verify locations
-    aren't valid, or if both are None.
+    aren't valid.
+
+    If both `file` and `path` are `None`, on Windows this method loads the
+    system root certificates. On Posix it raises an error.
     """
-    let fs = try (file as FilePath).path else "" end
-    let ps = try (path as FilePath).path else "" end
+    if (file is None) and (path is None) then
+      ifdef windows then
+        _load_windows_root_certs()?
+      else
+        error
+      end
+    else
+      let fs = try (file as FilePath).path else "" end
+      let ps = try (path as FilePath).path else "" end
 
-    let f = if fs.size() > 0 then fs.cstring() else Pointer[U8] end
-    let p = if ps.size() > 0 then ps.cstring() else Pointer[U8] end
+      let f = if fs.size() > 0 then fs.cstring() else Pointer[U8] end
+      let p = if ps.size() > 0 then ps.cstring() else Pointer[U8] end
 
-    if
-      _ctx.is_null()
-        or (f.is_null() and p.is_null())
-        or (0 == @SSL_CTX_load_verify_locations[I32](_ctx, f, p))
-    then
-      error
+      if
+        _ctx.is_null()
+          or (f.is_null() and p.is_null())
+          or (0 == @SSL_CTX_load_verify_locations[I32](_ctx, f, p))
+      then
+        error
+      end
+    end
+
+  fun ref _load_windows_root_certs() ? =>
+    ifdef windows then
+      let root_str = "ROOT"
+      let hStore = @CertOpenSystemStoreA[Pointer[U8] tag](Pointer[U8],
+        root_str.cstring())
+      if hStore.is_null() then error end
+
+      let x509_store: Pointer[U8] tag = @X509_STORE_new[Pointer[U8]]()
+      if x509_store.is_null() then error end
+
+      try
+        var pContext: NullablePointer[_CertContext]
+        pContext =
+          @CertEnumCertificatesInStore[NullablePointer[_CertContext]](hStore,
+            Pointer[_CertContext])
+
+        while not pContext.is_none() do
+          let cert_context = pContext()?
+          let x509 = @d2i_X509[Pointer[U8] tag](Pointer[U8],
+            addressof cert_context.pbCertEncoded, cert_context.cbCertEncoded)
+          if not x509.is_null() then
+            let result = @X509_STORE_add_cert[U32](x509_store, x509)
+            @X509_free[None](x509)
+            if result != 1 then error end
+          end
+
+          pContext =
+            @CertEnumCertificatesInStore[NullablePointer[_CertContext]](hStore,
+              pContext)
+        end
+
+        @SSL_CTX_set_cert_store[None](_ctx, x509_store)
+      else
+        @X509_STORE_free[None](x509_store)
+      then
+        @CertCloseStore[Bool](hStore, U32(0))
+      end
     end
 
   fun ref set_ciphers(ciphers: String) ? =>
@@ -366,3 +419,9 @@ class val SSLContext
     if not _ctx.is_null() then
       @SSL_CTX_free(_ctx)
     end
+
+
+struct _CertContext
+  var dwCertEncodingType: U32 = 0
+  var pbCertEncoded: Pointer[U8] = Pointer[U8]
+  var cbCertEncoded: U32 = 0
