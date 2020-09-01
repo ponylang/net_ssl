@@ -9,6 +9,7 @@ All notable changes to this library will be documented in this file. This projec
 
 ### Added
 
+- Add the ability to load Windows root certificates ([PR #38](https://github.com/ponylang/net_ssl/pull/38))
 
 ### Changed
 
