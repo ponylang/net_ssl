@@ -15,7 +15,9 @@ actor Main is TestList
     test(_TestTCPSSLExpect)
     test(_TestTCPSSLMute)
     test(_TestTCPSSLUnmute)
-    ifdef not windows then
+    ifdef windows then
+      test(_TestWindowsLoadRootCertificates)
+    else
       test(_TestTCPSSLThrottle)
     end
 
@@ -279,6 +281,36 @@ class iso _TestTCPSSLThrottle is UnitTest
     _TestTCP(h)(
       SSLConnection(_TestTCPThrottleSendNotify(h), consume ssl_client),
       SSLConnection(_TestTCPThrottleReceiveNotify(h), consume ssl_server))
+
+class iso _TestWindowsLoadRootCertificates is UnitTest
+  """
+  Test loading the Windows root certificates when `set_authority(None, None)`
+  is called.
+  """
+  fun name(): String => "net/TCPSSLWindowsLoadRootCertificates"
+
+  fun ref apply(h: TestHelper) =>
+    try
+      let auth = h.env.root as AmbientAuth
+      let ssl_ctx =
+        recover
+          SSLContext
+            .>set_authority(None, None)?
+            .>set_cert(FilePath(auth, "assets/cert.pem")?,
+              FilePath(auth, "assets/key.pem")?)?
+            .>set_client_verify(true)
+            .>set_server_verify(true)
+        end
+
+      let ssl_client = ssl_ctx.client()?
+      let ssl_server = ssl_ctx.server()?
+
+      _TestTCP(h)(
+        SSLConnection(_TestTCPExpectNotify(h, false), consume ssl_client),
+        SSLConnection(_TestTCPExpectNotify(h, true), consume ssl_server))
+    else
+      h.fail("set_authority failed")
+    end
 
 class _TestTCPThrottleReceiveNotify is TCPConnectionNotify
   """
