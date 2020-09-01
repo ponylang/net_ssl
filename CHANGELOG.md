@@ -2,17 +2,11 @@
 
 All notable changes to this library will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a CHANGELOG](http://keepachangelog.com/).
 
-## [unreleased] - unreleased
-
-### Fixed
-
+## [1.1.1] - 2020-09-01
 
 ### Added
 
 - Add the ability to load Windows root certificates ([PR #38](https://github.com/ponylang/net_ssl/pull/38))
-
-### Changed
-
 
 ## [1.1.0] - 2020-08-22
 
