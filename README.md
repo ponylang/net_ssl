@@ -25,13 +25,13 @@ The default is to use the 0.9.x library APIs. You can change the selected suppor
 ### Using OpenSSL 0.9.0
 
 ```bash
-stable env ponyc -Dopenssl_0.9.0
+corral run -- ponyc -Dopenssl_0.9.0
 ```
 
 ### Using OpenSSL 1.1.x
 
 ```bash
-stable env ponyc -Dopenssl_1.1.x
+corral run -- ponyc -Dopenssl_1.1.x
 ```
 
 ## Dependencies
