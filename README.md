@@ -4,8 +4,6 @@ Pony library that brings SSL networking support to Pony. Requires LibreSSL or Op
 
 ## Status
 
-[![Actions Status](https://github.com/ponylang/net_ssl/workflows/vs-ponyc-latest/badge.svg)](https://github.com/ponylang/net_ssl/actions)
-
 Production ready.
 
 ## Installation
