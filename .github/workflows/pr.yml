@@ -28,18 +28,18 @@ jobs:
       - name: Verify CHANGELOG
         run: changelog-tool verify
 
-  test-libressl-vs-ponyc-release:
-    name: 0.9.0 with most recent ponyc release
+  test-libressl-3_2_5-vs-ponyc-release:
+    name: LibreSSL 3.2.5 with most recent ponyc release
     runs-on: ubuntu-latest
     container:
-      image: ponylang/shared-docker-ci-x86-64-unknown-linux-builder-with-libressl:release
+      image: ponylang/shared-docker-ci-x86-64-unknown-linux-builder-with-libressl-3.2.5:release
     steps:
       - uses: actions/checkout@v1
       - name: Test
         run: make test config=debug ssl=0.9.0
 
   test-openssl-1_1_1k-vs-ponyc-release:
-    name: 1.1.1k with most recent ponyc release
+    name: OpenSSL 1.1.1k with most recent ponyc release
     runs-on: ubuntu-latest
     container:
       image: ponylang/shared-docker-ci-x86-64-unknown-linux-builder-with-openssl_1.1.1k:release
