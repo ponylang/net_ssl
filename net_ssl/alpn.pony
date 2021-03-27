@@ -9,6 +9,14 @@ primitive ALPNNoAck
 primitive ALPNWarning
 
 type ALPNMatchResult is (ALPNProtocolName | ALPNNoAck | ALPNWarning | ALPNFatal)
+type _ALPNSelectCallback is @{(
+   Pointer[_SSL] tag,
+   Pointer[Pointer[U8] tag] tag,
+   Pointer[U8] tag,
+   Pointer[U8] box,
+   U32,
+   ALPNProtocolResolver box)
+  : I32}
 
 interface box ALPNProtocolResolver
   """

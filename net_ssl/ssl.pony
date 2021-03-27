@@ -5,6 +5,26 @@ use @SSL_ctrl[ILong](
   op: I32,
   arg: ILong,
   parg: Pointer[None])
+use @SSL_new[Pointer[_SSL]](ctx: Pointer[_SSLContext] tag)
+use @SSL_free[None](ssl: Pointer[_SSL] tag)
+use @SSL_set_verify[None](ssl: Pointer[_SSL], mode: I32, cb: Pointer[U8])
+use @BIO_s_mem[Pointer[U8]]()
+use @BIO_new[Pointer[_BIO]](typ: Pointer[U8])
+use @SSL_set_bio[None](ssl: Pointer[_SSL], rbio: Pointer[_BIO] tag, wbio: Pointer[_BIO] tag)
+use @SSL_set_accept_state[None](ssl: Pointer[_SSL])
+use @SSL_set_connect_state[None](ssl: Pointer[_SSL])
+use @SSL_do_handshake[I32](ssl: Pointer[_SSL])
+use @SSL_get0_alpn_selected[None](ssl: Pointer[_SSL] tag, data: Pointer[Pointer[U8] iso],
+  len: Pointer[U32]) if "openssl_1.1.x"
+use @SSL_pending[I32](ssl: Pointer[_SSL])
+use @SSL_read[I32](ssl: Pointer[_SSL], buf: Pointer[U8] tag, len: U32)
+use @SSL_write[I32](ssl: Pointer[_SSL], buf: Pointer[U8] tag, len: U32)
+use @BIO_read[I32](bio: Pointer[_BIO] tag, buf: Pointer[U8] tag, len: U32)
+use @BIO_write[I32](bio: Pointer[_BIO] tag, buf: Pointer[U8] tag, len: U32)
+use @SSL_get_error[I32](ssl: Pointer[_SSL], ret: I32)
+use @BIO_ctrl_pending[USize](bio: Pointer[_BIO] tag)
+use @SSL_has_pending[I32](ssl: Pointer[_SSL]) if "openssl_1.1.x"
+use @SSL_get_peer_certificate[Pointer[X509]](ssl: Pointer[_SSL])
 
 primitive _SSL
 primitive _BIO
@@ -41,16 +61,16 @@ class SSL
     if ctx.is_null() then error end
     _hostname = hostname
 
-    _ssl = @SSL_new[Pointer[_SSL]](ctx)
+    _ssl = @SSL_new(ctx)
     if _ssl.is_null() then error end
 
     let mode = if verify then I32(3) else I32(0) end
-    @SSL_set_verify[None](_ssl, mode, Pointer[U8])
+    @SSL_set_verify(_ssl, mode, Pointer[U8])
 
-    _input = @BIO_new[Pointer[_BIO]](@BIO_s_mem[Pointer[U8]]())
+    _input = @BIO_new(@BIO_s_mem())
     if _input.is_null() then error end
 
-    _output = @BIO_new[Pointer[_BIO]](@BIO_s_mem[Pointer[U8]]())
+    _output = @BIO_new(@BIO_s_mem())
     if _output.is_null() then error end
 
     @SSL_set_bio[None](_ssl, _input, _output)
@@ -65,10 +85,10 @@ class SSL
     end
 
     if server then
-      @SSL_set_accept_state[None](_ssl)
+      @SSL_set_accept_state(_ssl)
     else
-      @SSL_set_connect_state[None](_ssl)
-      @SSL_do_handshake[I32](_ssl)
+      @SSL_set_connect_state(_ssl)
+      @SSL_do_handshake(_ssl)
     end
 
   fun box alpn_selected(): (ALPNProtocolName | None) =>
@@ -78,7 +98,7 @@ class SSL
     var ptr: Pointer[U8] iso = recover Pointer[U8] end
     var len = U32(0)
     ifdef "openssl_1.1.x" then
-      @SSL_get0_alpn_selected[None](_ssl, addressof ptr, addressof len)
+      @SSL_get0_alpn_selected(_ssl, addressof ptr, addressof len)
     end
 
     if ptr.is_null() then None
@@ -111,7 +131,7 @@ class SSL
     end
 
     let max = if expect > 0 then expect - offset else USize.max_value() end
-    let pending = @SSL_pending[I32](_ssl).usize()
+    let pending = @SSL_pending(_ssl).usize()
 
     if pending > 0 then
       if expect > 0 then
@@ -121,14 +141,14 @@ class SSL
       end
 
       _read_buf.undefined(offset + len)
-      @SSL_read[I32](_ssl, _read_buf.cpointer(offset), len.i32())
+      @SSL_read(_ssl, _read_buf.cpointer(offset), len.u32())
     else
       _read_buf.undefined(offset + len)
       let r =
-        @SSL_read[I32](_ssl, _read_buf.cpointer(offset), len.i32())
+        @SSL_read(_ssl, _read_buf.cpointer(offset), len.u32())
 
       if r <= 0 then
-        match @SSL_get_error[I32](_ssl, r)
+        match @SSL_get_error(_ssl, r)
         | 1 | 5 | 6 => _state = SSLError
         | 2 =>
           // SSL buffer has more data but it is not yet decoded (or something)
@@ -152,7 +172,7 @@ class SSL
       _read_buf = []
     else
       // try and read again any pending data that SSL hasn't decoded yet
-      if @BIO_ctrl_pending[USize](_input) > 0 then
+      if @BIO_ctrl_pending(_input) > 0 then
         read(expect)
       else
         ifdef "openssl_1.1.x" then
@@ -160,7 +180,7 @@ class SSL
           // been read via `SSL_has_pending` that was added in 1.1
           // This mailing list post has a good description of what it is for:
           // https://mta.openssl.org/pipermail/openssl-users/2017-January/005110.html
-          if @SSL_has_pending[I32](_ssl) == 1 then
+          if @SSL_has_pending(_ssl) == 1 then
             read(expect)
           end
         end
@@ -175,22 +195,22 @@ class SSL
     if _state isnt SSLReady then error end
 
     if data.size() > 0 then
-      @SSL_write[I32](_ssl, data.cpointer(), data.size().u32())
+      @SSL_write(_ssl, data.cpointer(), data.size().u32())
     end
 
   fun ref receive(data: ByteSeq) =>
     """
     When data is received, add it to the SSL session.
     """
-    @BIO_write[I32](_input, data.cpointer(), data.size().u32())
+    @BIO_write(_input, data.cpointer(), data.size().u32())
 
     if _state is SSLHandshake then
-      let r = @SSL_do_handshake[I32](_ssl)
+      let r = @SSL_do_handshake(_ssl)
 
       if r > 0 then
         _verify_hostname()
       else
-        match @SSL_get_error[I32](_ssl, r)
+        match @SSL_get_error(_ssl, r)
         | 1 => _state = SSLAuthFail
         | 5 | 6 => _state = SSLError
         end
@@ -201,18 +221,18 @@ class SSL
     """
     Returns true if there are encrypted bytes to be passed to the destination.
     """
-    @BIO_ctrl_pending[USize](_output) > 0
+    @BIO_ctrl_pending(_output) > 0
 
   fun ref send(): Array[U8] iso^ ? =>
     """
     Returns encrypted bytes to be passed to the destination. Raises an error
     if no data is available.
     """
-    let len = @BIO_ctrl_pending[USize](_output)
+    let len = @BIO_ctrl_pending(_output)
     if len == 0 then error end
 
     let buf = recover Array[U8] .> undefined(len) end
-    @BIO_read[I32](_output, buf.cpointer(), buf.size().u32())
+    @BIO_read(_output, buf.cpointer(), buf.size().u32())
     buf
 
   fun ref dispose() =>
@@ -220,7 +240,7 @@ class SSL
     Dispose of the session.
     """
     if not _ssl.is_null() then
-      @SSL_free[None](_ssl)
+      @SSL_free(_ssl)
       _ssl = Pointer[_SSL]
     end
 
@@ -229,7 +249,7 @@ class SSL
     Dispose of the session.
     """
     if not _ssl.is_null() then
-      @SSL_free[None](_ssl)
+      @SSL_free(_ssl)
     end
 
   fun ref _verify_hostname() =>
@@ -237,11 +257,11 @@ class SSL
     Verify that the certificate is valid for the given hostname.
     """
     if _hostname.size() > 0 then
-      let cert = @SSL_get_peer_certificate[Pointer[X509]](_ssl)
+      let cert = @SSL_get_peer_certificate(_ssl)
       let ok = X509.valid_for_host(cert, _hostname)
 
       if not cert.is_null() then
-        @X509_free[None](cert)
+        @X509_free(cert)
       end
 
       if not ok then
