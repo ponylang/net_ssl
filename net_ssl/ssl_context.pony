@@ -3,18 +3,41 @@ use "files"
 use "lib:crypt32" if windows
 use "lib:cryptui" if windows
 
+use @memcpy[Pointer[U8]](dst: Pointer[None], src: Pointer[None], n: USize)
 use @SSL_CTX_ctrl[ILong](
   ctx: Pointer[_SSLContext] tag,
   op: I32,
   arg: ULong,
   parg: Pointer[None])
-
-use @SSLv23_method[Pointer[None]]()
-use @TLS_method[Pointer[None]]()
+use @SSLv23_method[Pointer[None]]() if "openssl_0.9.0"
+use @TLS_method[Pointer[None]]() if "openssl_1.1.x"
 use @SSL_CTX_new[Pointer[_SSLContext]](method: Pointer[None])
 use @SSL_CTX_free[None](ctx: Pointer[_SSLContext] tag)
-use @SSL_CTX_clear_options[ULong](ctx: Pointer[_SSLContext] tag, opts: ULong)
-use @SSL_CTX_set_options[ULong](ctx: Pointer[_SSLContext] tag, opts: ULong)
+use @SSL_CTX_clear_options[ULong](ctx: Pointer[_SSLContext] tag, opts: ULong) if "openssl_1.1.x"
+use @SSL_CTX_set_options[ULong](ctx: Pointer[_SSLContext] tag, opts: ULong) if "openssl_1.1.x"
+use @SSL_CTX_use_certificate_chain_file[I32](ctx: Pointer[_SSLContext] tag, file: Pointer[U8] tag)
+use @SSL_CTX_use_PrivateKey_file[I32](ctx: Pointer[_SSLContext] tag, file: Pointer[U8] tag, typ: I32)
+use @SSL_CTX_check_private_key[I32](ctx: Pointer[_SSLContext] tag)
+use @SSL_CTX_load_verify_locations[I32](ctx: Pointer[_SSLContext] tag, ca_file: Pointer[U8] tag,
+  ca_path: Pointer[U8] tag)
+use @X509_STORE_new[Pointer[U8] tag]()
+use @CertOpenSystemStoreA[Pointer[U8] tag](prov: Pointer[U8] tag, protcol: Pointer[U8] tag)
+  if windows
+use @CertEnumCertificatesInStore[NullablePointer[_CertContext]](cert_store: Pointer[U8] tag,
+  prev_ctx: NullablePointer[_CertContext]) if windows
+use @d2i_X509[Pointer[X509] tag](val_out: Pointer[U8] tag, der_in: Pointer[Pointer[U8]],
+  length: U32)
+use @X509_STORE_add_cert[U32](store: Pointer[U8] tag, x509: Pointer[X509] tag)
+use @X509_free[None](x509: Pointer[X509] tag)
+use @SSL_CTX_set_cert_store[None](ctx: Pointer[_SSLContext] tag, store: Pointer[U8] tag)
+use @X509_STORE_free[None](store: Pointer[U8] tag)
+use @CertCloseStore[Bool](store: Pointer[U8] tag, flags: U32) if windows
+use @SSL_CTX_set_cipher_list[I32](ctx: Pointer[_SSLContext] tag, control: Pointer[U8] tag)
+use @SSL_CTX_set_verify_depth[None](ctx: Pointer[_SSLContext] tag, depth: U32)
+use @SSL_CTX_set_alpn_select_cb[None](ctx: Pointer[_SSLContext] tag, cb: _ALPNSelectCallback,
+   resolver: ALPNProtocolResolver) if "openssl_1.1.x"
+use @SSL_CTX_set_alpn_protos[I32](ctx: Pointer[_SSLContext] tag, protos: Pointer[U8] tag,
+  protos_len: USize) if "openssl_1.1.x"
 
 primitive _SSLContext
 
@@ -123,11 +146,11 @@ class val SSLContext
       _ctx.is_null()
         or (cert.path.size() == 0)
         or (key.path.size() == 0)
-        or (0 == @SSL_CTX_use_certificate_chain_file[I32](
+        or (0 == @SSL_CTX_use_certificate_chain_file(
           _ctx, cert.path.cstring()))
-        or (0 == @SSL_CTX_use_PrivateKey_file[I32](
+        or (0 == @SSL_CTX_use_PrivateKey_file(
           _ctx, key.path.cstring(), I32(1)))
-        or (0 == @SSL_CTX_check_private_key[I32](_ctx))
+        or (0 == @SSL_CTX_check_private_key(_ctx))
     then
       error
     end
@@ -162,7 +185,7 @@ class val SSLContext
       if
         _ctx.is_null()
           or (f.is_null() and p.is_null())
-          or (0 == @SSL_CTX_load_verify_locations[I32](_ctx, f, p))
+          or (0 == @SSL_CTX_load_verify_locations(_ctx, f, p))
       then
         error
       end
@@ -171,39 +194,35 @@ class val SSLContext
   fun ref _load_windows_root_certs() ? =>
     ifdef windows then
       let root_str = "ROOT"
-      let hStore = @CertOpenSystemStoreA[Pointer[U8] tag](Pointer[U8],
-        root_str.cstring())
+      let hStore = @CertOpenSystemStoreA(Pointer[U8], root_str.cstring())
       if hStore.is_null() then error end
 
-      let x509_store: Pointer[U8] tag = @X509_STORE_new[Pointer[U8]]()
+      let x509_store = @X509_STORE_new()
       if x509_store.is_null() then error end
 
       try
         var pContext: NullablePointer[_CertContext]
         pContext =
-          @CertEnumCertificatesInStore[NullablePointer[_CertContext]](hStore,
-            Pointer[_CertContext])
+          @CertEnumCertificatesInStore(hStore, NullablePointer[_CertContext].none())
 
         while not pContext.is_none() do
           let cert_context = pContext()?
-          let x509 = @d2i_X509[Pointer[U8] tag](Pointer[U8],
-            addressof cert_context.pbCertEncoded, cert_context.cbCertEncoded)
+          let x509 = @d2i_X509(Pointer[U8], addressof cert_context.pbCertEncoded,
+            cert_context.cbCertEncoded)
           if not x509.is_null() then
-            let result = @X509_STORE_add_cert[U32](x509_store, x509)
-            @X509_free[None](x509)
+            let result = @X509_STORE_add_cert(x509_store, x509)
+            @X509_free(x509)
             if result != 1 then error end
           end
 
-          pContext =
-            @CertEnumCertificatesInStore[NullablePointer[_CertContext]](hStore,
-              pContext)
+          pContext = @CertEnumCertificatesInStore(hStore, pContext)
         end
 
-        @SSL_CTX_set_cert_store[None](_ctx, x509_store)
+        @SSL_CTX_set_cert_store(_ctx, x509_store)
       else
-        @X509_STORE_free[None](x509_store)
+        @X509_STORE_free(x509_store)
       then
-        @CertCloseStore[Bool](hStore, U32(0))
+        @CertCloseStore(hStore, U32(0))
       end
     end
 
@@ -214,7 +233,7 @@ class val SSLContext
     """
     if
       _ctx.is_null()
-        or (0 == @SSL_CTX_set_cipher_list[I32](_ctx, ciphers.cstring()))
+        or (0 == @SSL_CTX_set_cipher_list(_ctx, ciphers.cstring()))
     then
       error
     end
@@ -236,7 +255,7 @@ class val SSLContext
     Set the verify depth. Defaults to 6.
     """
     if not _ctx.is_null() then
-      @SSL_CTX_set_verify_depth[None](_ctx, depth)
+      @SSL_CTX_set_verify_depth(_ctx, depth)
     end
 
   fun ref set_min_proto_version(version: ULong) ? =>
@@ -299,7 +318,7 @@ class val SSLContext
     Requires OpenSSL >= 1.0.2
     """
     ifdef "openssl_1.1.x" then
-      @SSL_CTX_set_alpn_select_cb[None](
+      @SSL_CTX_set_alpn_select_cb(
         _ctx, addressof SSLContext._alpn_select_cb, resolver)
       return true
     elseif "openssl_0.9.0" then
@@ -320,7 +339,7 @@ class val SSLContext
       try
         let proto_list = _ALPNProtocolList.from_array(protocols)?
         let result =
-          @SSL_CTX_set_alpn_protos[I32](
+          @SSL_CTX_set_alpn_protos(
             _ctx, proto_list.cpointer(), proto_list.size())
         return result == 0
       end
@@ -350,8 +369,8 @@ class val SSLContext
       var size = matched.size()
       if (size > 0) and (size <= 255) then
         var ptr = matched.cpointer()
-        @memcpy[None](out, addressof ptr, size.bitwidth() / 8)
-        @memcpy[None](outlen, addressof size, USize(1))
+        @memcpy(out, addressof ptr, size.bitwidth() / 8)
+        @memcpy(outlen, addressof size, USize(1))
         _ALPNMatchResultCode.ok()
       else
         _ALPNMatchResultCode.fatal()

@@ -1,6 +1,27 @@
 use "collections"
 use "net"
 
+use @pony_os_ip_string[Pointer[U8]](src: Pointer[U8], len: I32)
+use @X509_get_subject_name[Pointer[_X509Name]](cert: Pointer[X509])
+use @X509_NAME_get_text_by_NID[I32](name: Pointer[_X509Name], nid: I32,
+  buf: Pointer[U8] tag, len: I32)
+use @X509_get_ext_d2i[Pointer[_GeneralNameStack]](cert: Pointer[X509],
+  nid: I32, crit: Pointer[U8], idx: Pointer[U8])
+use @OPENSSL_sk_pop[Pointer[_GeneralName]](stack: Pointer[_GeneralNameStack])
+  if "openssl_1.1.x"
+use @sk_pop[Pointer[_GeneralName]](stack: Pointer[_GeneralNameStack])
+  if "openssl_0.9.0"
+use @GENERAL_NAME_get0_value[Pointer[U8] tag](name: Pointer[_GeneralName],
+  ptype: Pointer[I32])
+use @ASN1_STRING_type[I32](value: Pointer[U8] tag)
+use @ASN1_STRING_get0_data[Pointer[U8]](value: Pointer[U8] tag)
+use @ASN1_STRING_length[I32](value: Pointer[U8] tag)
+use @GENERAL_NAME_free[None](name: Pointer[_GeneralName])
+use @OPENSSL_sk_free[None](stack: Pointer[_GeneralNameStack])
+  if "openssl_1.1.x"
+use @sk_free[None](stack: Pointer[_GeneralNameStack])
+  if "openssl_0.9.0"
+
 primitive _X509Name
 primitive _GeneralName
 primitive _GeneralNameStack
@@ -24,14 +45,14 @@ primitive X509
     """
     if cert.is_null() then error end
 
-    let subject = @X509_get_subject_name[Pointer[_X509Name]](cert)
+    let subject = @X509_get_subject_name(cert)
     let len =
-      @X509_NAME_get_text_by_NID[I32](subject, I32(13), Pointer[U8], I32(0))
+      @X509_NAME_get_text_by_NID(subject, I32(13), Pointer[U8], I32(0))
 
     if len < 0 then error end
 
     let common = recover String(len.usize()) end
-    @X509_NAME_get_text_by_NID[I32](
+    @X509_NAME_get_text_by_NID(
       subject, I32(13), common.cstring(), len + 1)
     common.recalc()
 
@@ -56,8 +77,7 @@ primitive X509
     end
 
     let stack =
-      @X509_get_ext_d2i[Pointer[_GeneralNameStack]](
-        cert, I32(85), Pointer[U8], Pointer[U8])
+      @X509_get_ext_d2i(cert, I32(85), Pointer[U8], Pointer[U8])
 
     if stack.is_null() then
       return array
@@ -65,9 +85,9 @@ primitive X509
 
     var name =
       ifdef "openssl_1.1.x" then
-        @OPENSSL_sk_pop[Pointer[_GeneralName]](stack)
+        @OPENSSL_sk_pop(stack)
       elseif "openssl_0.9.0" then
-        @sk_pop[Pointer[_GeneralName]](stack)
+        @sk_pop(stack)
       else
         compile_error "You must select an SSL version to use."
       end
@@ -75,18 +95,18 @@ primitive X509
     while not name.is_null() do
       var ptype = I32(0)
       let value =
-        @GENERAL_NAME_get0_value[Pointer[U8] tag](name, addressof ptype)
+        @GENERAL_NAME_get0_value(name, addressof ptype)
 
       match ptype
       | 2 => // GEN_DNS
         // Check for V_ASN1_IA5STRING
-        if @ASN1_STRING_type[I32](value) == 22 then
+        if @ASN1_STRING_type(value) == 22 then
           try
             array.push(
               recover
                 // Build a String from the ASN1 data.
-                let data = @ASN1_STRING_get0_data[Pointer[U8]](value)
-                let len = @ASN1_STRING_length[I32](value)
+                let data = @ASN1_STRING_get0_data(value)
+                let len = @ASN1_STRING_length(value)
                 let s = String.copy_cstring(data)
 
                 // If it contains NULL bytes, don't include it.
@@ -103,26 +123,26 @@ primitive X509
         array.push(
           recover
             // Build a String from the ASN1 data.
-            let data = @ASN1_STRING_get0_data[Pointer[U8]](value)
-            let len = @ASN1_STRING_length[I32](value)
-            String.from_cstring(@pony_os_ip_string[Pointer[U8]](data, len))
+            let data = @ASN1_STRING_get0_data(value)
+            let len = @ASN1_STRING_length(value)
+            String.from_cstring(@pony_os_ip_string(data, len))
           end)
       end
 
       @GENERAL_NAME_free[None](name)
       ifdef "openssl_1.1.x" then
-        name = @OPENSSL_sk_pop[Pointer[_GeneralName]](stack)
+        name = @OPENSSL_sk_pop(stack)
       elseif "openssl_0.9.0" then
-        name = @sk_pop[Pointer[_GeneralName]](stack)
+        name = @sk_pop(stack)
       else
         compile_error "You must select an SSL version to use."
       end
     end
 
     ifdef "openssl_1.1.x" then
-      @OPENSSL_sk_free[None](stack)
+      @OPENSSL_sk_free(stack)
     elseif "openssl_0.9.0" then
-      @sk_free[None](stack)
+      @sk_free(stack)
     else
       compile_error "You must select an SSL version to use."
     end
