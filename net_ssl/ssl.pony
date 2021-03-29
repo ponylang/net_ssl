@@ -121,11 +121,11 @@ class SSL
       end
 
       _read_buf.undefined(offset + len)
-      @SSL_read[I32](_ssl, _read_buf.cpointer().usize() + offset, len.i32())
+      @SSL_read[I32](_ssl, _read_buf.cpointer(offset), len.i32())
     else
       _read_buf.undefined(offset + len)
       let r =
-        @SSL_read[I32](_ssl, _read_buf.cpointer().usize() + offset, len.i32())
+        @SSL_read[I32](_ssl, _read_buf.cpointer(offset), len.i32())
 
       if r <= 0 then
         match @SSL_get_error[I32](_ssl, r)
