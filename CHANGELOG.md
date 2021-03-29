@@ -6,6 +6,7 @@ All notable changes to this library will be documented in this file. This projec
 
 ### Fixed
 
+- Fix possible memory leak ([PR #46](https://github.com/ponylang/net_ssl/pull/46))
 
 ### Added
 
