@@ -2,17 +2,11 @@
 
 All notable changes to this library will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a CHANGELOG](http://keepachangelog.com/).
 
-## [unreleased] - unreleased
+## [1.1.3] - 2021-03-29
 
 ### Fixed
 
 - Fix possible memory leak ([PR #46](https://github.com/ponylang/net_ssl/pull/46))
-
-### Added
-
-
-### Changed
-
 
 ## [1.1.2] - 2021-02-07
 
