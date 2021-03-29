@@ -12,6 +12,7 @@ All notable changes to this library will be documented in this file. This projec
 
 ### Changed
 
+- Declare all FFI functions ([PR #47](https://github.com/ponylang/net_ssl/pull/47))
 
 ## [1.1.3] - 2021-03-29
 
