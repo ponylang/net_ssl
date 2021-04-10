@@ -129,7 +129,7 @@ primitive X509
           end)
       end
 
-      @GENERAL_NAME_free[None](name)
+      @GENERAL_NAME_free(name)
       ifdef "openssl_1.1.x" then
         name = @OPENSSL_sk_pop(stack)
       elseif "openssl_0.9.0" then

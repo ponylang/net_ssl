@@ -73,7 +73,7 @@ class SSL
     _output = @BIO_new(@BIO_s_mem())
     if _output.is_null() then error end
 
-    @SSL_set_bio[None](_ssl, _input, _output)
+    @SSL_set_bio(_ssl, _input, _output)
 
     if
       (_hostname.size() > 0)
