@@ -12,6 +12,7 @@ All notable changes to this library will be documented in this file. This projec
 
 ### Changed
 
+- Remove explicit return type from FFI calls ([PR #48](https://github.com/ponylang/net_ssl/pull/48))
 
 ## [1.1.4] - 2021-03-29
 
