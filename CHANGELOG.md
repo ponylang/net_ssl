@@ -6,6 +6,7 @@ All notable changes to this library will be documented in this file. This projec
 
 ### Fixed
 
+- Update to compile with ponyc 0.44.0 ([PR #49](https://github.com/ponylang/net_ssl/pull/49))
 
 ### Added
 
