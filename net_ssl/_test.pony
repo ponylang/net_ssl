@@ -296,8 +296,8 @@ class iso _TestWindowsLoadRootCertificates is UnitTest
         recover
           SSLContext
             .>set_authority(None, None)?
-            .>set_cert(FilePath(auth, "assets/cert.pem")?,
-              FilePath(auth, "assets/key.pem")?)?
+            .>set_cert(FilePath(auth, "assets/cert.pem"),
+              FilePath(auth, "assets/key.pem"))?
             .>set_client_verify(true)
             .>set_server_verify(true)
         end
@@ -660,10 +660,10 @@ primitive _TestSSLContext
         let auth = h.env.root as AmbientAuth
         recover
           SSLContext
-            .> set_authority(FilePath(auth, "assets/cert.pem")?)?
+            .> set_authority(FilePath(auth, "assets/cert.pem"))?
             .> set_cert(
-                FilePath(auth, "assets/cert.pem")?,
-                FilePath(auth, "assets/key.pem")?)?
+                FilePath(auth, "assets/cert.pem"),
+                FilePath(auth, "assets/key.pem"))?
             .> set_client_verify(true)
             .> set_server_verify(true)
         end
