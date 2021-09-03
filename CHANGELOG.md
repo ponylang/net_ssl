@@ -2,17 +2,11 @@
 
 All notable changes to this library will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a CHANGELOG](http://keepachangelog.com/).
 
-## [unreleased] - unreleased
+## [1.1.6] - 2021-09-03
 
 ### Fixed
 
 - Update to compile with ponyc 0.44.0 ([PR #49](https://github.com/ponylang/net_ssl/pull/49))
-
-### Added
-
-
-### Changed
-
 
 ## [1.1.5] - 2021-04-10
 
