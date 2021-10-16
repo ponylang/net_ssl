@@ -1,4 +1,5 @@
-use "path:/usr/local/opt/libressl/lib" if osx
+use "path:/usr/local/opt/libressl/lib" if osx and x86
+use "path:/opt/homebrew/opt/libressl/lib" if osx and arm
 use "lib:ssl"
 use "lib:crypto"
 
