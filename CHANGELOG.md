@@ -9,6 +9,7 @@ All notable changes to this library will be documented in this file. This projec
 
 ### Added
 
+- Add path to Homebrew's LibreSSL on ARM macOS ([PR #54](https://github.com/ponylang/net_ssl/pull/54))
 
 ### Changed
 
