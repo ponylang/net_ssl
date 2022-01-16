@@ -12,6 +12,7 @@ All notable changes to this library will be documented in this file. This projec
 
 ### Changed
 
+- Update to reflect change in type of Env.root ([PR #64](https://github.com/ponylang/net_ssl/pull/64))
 
 ## [1.1.7] - 2021-11-01
 
