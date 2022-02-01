@@ -3,7 +3,7 @@ use "itertools"
 use "files"
 use "net"
 
-actor Main is TestList
+actor \nodoc\ Main is TestList
   new create(env: Env) => PonyTest(env, this)
   new make() => None
 
@@ -21,7 +21,7 @@ actor Main is TestList
       test(_TestTCPSSLThrottle)
     end
 
-class iso _TestALPNProtocolListEncoding is UnitTest
+class \nodoc\ iso _TestALPNProtocolListEncoding is UnitTest
   """
   [Protocol Lists]() are correctly encoded and errors are raised when trying to encode invalid identifiers
   """
@@ -57,7 +57,7 @@ class iso _TestALPNProtocolListEncoding is UnitTest
       h.fail("failed to encode an array of valid identifiers")
     end
 
-class iso _TestALPNProtocolListDecode is UnitTest
+class \nodoc\ iso _TestALPNProtocolListDecode is UnitTest
   fun name(): String => "net/ssl/_ALPNProtocolList.to_array"
 
   fun apply(h: TestHelper) =>
@@ -87,7 +87,7 @@ class iso _TestALPNProtocolListDecode is UnitTest
       {()? => _ALPNProtocolList.to_array("\x01A\x01")? },
       "raise error on malformed data")
 
-class iso _TestALPNStandardProtocolResolver is UnitTest
+class \nodoc\ iso _TestALPNStandardProtocolResolver is UnitTest
   fun name(): String => "net/ssl/StandardALPNProtocolResolver"
 
   fun apply(h: TestHelper) =>
@@ -126,7 +126,7 @@ class iso _TestALPNStandardProtocolResolver is UnitTest
       h.fail("ALPNStandardProtocolResolver didn't return a matching protocol")
     end
 
-class iso _TestTCPSSLExpect is UnitTest
+class \nodoc\ iso _TestTCPSSLExpect is UnitTest
   """
   Test expecting framed data with TCP over SSL.
   """
@@ -150,7 +150,7 @@ class iso _TestTCPSSLExpect is UnitTest
     _TestTCP(h)(
       SSLConnection(_TestTCPExpectNotify(h, false), consume ssl_client), SSLConnection(_TestTCPExpectNotify(h, true), consume ssl_server))
 
-class iso _TestTCPSSLWritev is UnitTest
+class \nodoc\ iso _TestTCPSSLWritev is UnitTest
   """
   Test writev (and sent/sentv notification).
   """
@@ -172,7 +172,7 @@ class iso _TestTCPSSLWritev is UnitTest
     _TestTCP(h)(
       SSLConnection(_TestTCPWritevNotifyClient(h), consume ssl_client), SSLConnection(_TestTCPWritevNotifyServer(h), consume ssl_server))
 
-class iso _TestTCPSSLMute is UnitTest
+class \nodoc\ iso _TestTCPSSLMute is UnitTest
   """
   Test that the `mute` behavior stops us from reading incoming data. The
   test assumes that send/recv works correctly and that the absence of
@@ -210,7 +210,7 @@ class iso _TestTCPSSLMute is UnitTest
   fun timed_out(h: TestHelper) =>
     h.complete(true)
 
-class iso _TestTCPSSLUnmute is UnitTest
+class \nodoc\ iso _TestTCPSSLUnmute is UnitTest
   """
   Test that the `unmute` behavior will allow a connection to start reading
   incoming data again. The test assumes that `mute` works correctly and that
@@ -246,7 +246,7 @@ class iso _TestTCPSSLUnmute is UnitTest
       SSLConnection(_TestTCPMuteSendNotify(h), consume ssl_client),
       SSLConnection(_TestTCPUnmuteReceiveNotify(h), consume ssl_server))
 
-class iso _TestTCPSSLThrottle is UnitTest
+class \nodoc\ iso _TestTCPSSLThrottle is UnitTest
   """
   Test that when we experience backpressure when sending that the `throttled`
   method is called on our `TCPConnectionNotify` instance.
@@ -282,7 +282,7 @@ class iso _TestTCPSSLThrottle is UnitTest
       SSLConnection(_TestTCPThrottleSendNotify(h), consume ssl_client),
       SSLConnection(_TestTCPThrottleReceiveNotify(h), consume ssl_server))
 
-class iso _TestWindowsLoadRootCertificates is UnitTest
+class \nodoc\ iso _TestWindowsLoadRootCertificates is UnitTest
   """
   Test loading the Windows root certificates when `set_authority(None, None)`
   is called.
@@ -312,7 +312,7 @@ class iso _TestWindowsLoadRootCertificates is UnitTest
       h.fail("set_authority failed")
     end
 
-class _TestTCPThrottleReceiveNotify is TCPConnectionNotify
+class \nodoc\ _TestTCPThrottleReceiveNotify is TCPConnectionNotify
   """
   Notifier to that mutes itself on startup. We then send data to it in order
   to trigger backpressure on the sender.
@@ -333,7 +333,7 @@ class _TestTCPThrottleReceiveNotify is TCPConnectionNotify
   fun ref connect_failed(conn: TCPConnection ref) =>
     _h.fail_action("receiver connect failed")
 
-class _TestTCPThrottleSendNotify is TCPConnectionNotify
+class \nodoc\ _TestTCPThrottleSendNotify is TCPConnectionNotify
   """
   Notifier that sends data back when it receives any. Used in conjunction with
   the mute receiver to verify that after muting, we don't get any data on
@@ -375,7 +375,7 @@ class _TestTCPThrottleSendNotify is TCPConnectionNotify
     end
     data
 
-class _TestTCPMuteReceiveNotify is TCPConnectionNotify
+class \nodoc\ _TestTCPMuteReceiveNotify is TCPConnectionNotify
   """
   Notifier to fail a test if we receive data after muting the connection.
   """
@@ -405,7 +405,7 @@ class _TestTCPMuteReceiveNotify is TCPConnectionNotify
     _h.fail_action("receiver connect failed")
 
 
-class _TestTCPMuteSendNotify is TCPConnectionNotify
+class \nodoc\ _TestTCPMuteSendNotify is TCPConnectionNotify
   """
   Notifier that sends data back when it receives any. Used in conjunction with
   the mute receiver to verify that after muting, we don't get any data on
@@ -435,7 +435,7 @@ class _TestTCPMuteSendNotify is TCPConnectionNotify
      _h.complete_action("sender sent data")
      true
 
-class _TestTCPExpectNotify is TCPConnectionNotify
+class \nodoc\ _TestTCPExpectNotify is TCPConnectionNotify
   let _h: TestHelper
   let _server: Bool
   var _expect: USize = 4
@@ -520,7 +520,7 @@ class _TestTCPExpectNotify is TCPConnectionNotify
     buf.append(data)
     conn.write(consume buf)
 
-class _TestTCPWritevNotifyClient is TCPConnectionNotify
+class \nodoc\ _TestTCPWritevNotifyClient is TCPConnectionNotify
   let _h: TestHelper
 
   new iso create(h: TestHelper) =>
@@ -538,7 +538,7 @@ class _TestTCPWritevNotifyClient is TCPConnectionNotify
   fun ref connect_failed(conn: TCPConnection ref) =>
     _h.fail_action("client connect failed")
 
-class _TestTCPWritevNotifyServer is TCPConnectionNotify
+class \nodoc\ _TestTCPWritevNotifyServer is TCPConnectionNotify
   let _h: TestHelper
   var _buffer: String iso = recover iso String end
 
@@ -565,7 +565,7 @@ class _TestTCPWritevNotifyServer is TCPConnectionNotify
   fun ref connect_failed(conn: TCPConnection ref) =>
     _h.fail_action("sender connect failed")
 
-class _TestTCP is TCPListenNotify
+class \nodoc\ _TestTCP is TCPListenNotify
   """
   Run a typical TCP test consisting of a single TCPListener that accepts a
   single TCPConnection as a client, using a dynamic available listen port.
@@ -619,7 +619,7 @@ class _TestTCP is TCPListenNotify
       error
     end
 
-class _TestTCPUnmuteReceiveNotify is TCPConnectionNotify
+class \nodoc\ _TestTCPUnmuteReceiveNotify is TCPConnectionNotify
   """
   Notifier to test that after muting and unmuting a connection, we get data
   """
@@ -649,7 +649,7 @@ class _TestTCPUnmuteReceiveNotify is TCPConnectionNotify
   fun ref connect_failed(conn: TCPConnection ref) =>
     _h.fail_action("receiver connect failed")
 
-primitive _TestSSLContext
+primitive \nodoc\ _TestSSLContext
   fun val apply(h: TestHelper): (SSL iso^, SSL iso^) ? =>
     let sslctx =
       try
