@@ -1,7 +1,7 @@
 Param(
   [Parameter(Position=0, Mandatory=$true, HelpMessage="The action to take (build, test, install, package, clean).")]
   [string]
-  $Command = 'build',
+  $Command,
 
   [Parameter(HelpMessage="The build configuration (Release, Debug).")]
   [string]
