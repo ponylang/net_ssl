@@ -8,7 +8,7 @@ actor Main
   new create(env: Env) =>
     let limit = try env.args(1)?.usize()? else 1 end
 
-    let auth = env.root
+    let file_auth = FileAuth(env.root)
 
     let sslctx =
       try
@@ -17,10 +17,10 @@ actor Main
         recover
           SSLContext
             .> set_authority(
-              FilePath(auth, "assets/cert.pem"))?
+              FilePath(file_auth, "assets/cert.pem"))?
             .> set_cert(
-              FilePath(auth, "assets/cert.pem"),
-              FilePath(auth, "assets/key.pem"))?
+              FilePath(file_auth, "assets/cert.pem"),
+              FilePath(file_auth, "assets/key.pem"))?
             .> set_client_verify(true)
             .> set_server_verify(true)
         end
@@ -30,12 +30,12 @@ actor Main
       end
 
     TCPListener(
-      auth,
-      Listener(consume sslctx, auth, env.out, limit))
+      TCPListenAuth(env.root),
+      Listener(consume sslctx, TCPConnectAuth(env.root), env.out, limit))
 
 class Listener is TCPListenNotify
   let _sslctx: SSLContext
-  let _auth: AmbientAuth
+  let _auth: TCPConnectAuth
   let _out: OutStream
   let _limit: USize
   var _host: String = ""
@@ -44,7 +44,7 @@ class Listener is TCPListenNotify
 
   new iso create(
     sslctx: SSLContext,
-    auth: AmbientAuth,
+    auth: TCPConnectAuth,
     out: OutStream,
     limit: USize)
   =>
