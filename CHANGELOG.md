@@ -2,19 +2,13 @@
 
 All notable changes to this library will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a CHANGELOG](http://keepachangelog.com/).
 
-## [unreleased] - unreleased
+## [1.2.1] - 2022-02-26
 
 ### Fixed
 
 - Update to work with object capabilities changes in Pony 0.49.0 ([PR #69](https://github.com/ponylang/net_ssl/pull/69))
 - Update to address PonyTest package being renamed ([PR #70](https://github.com/ponylang/net_ssl/pull/70))
 - Remove hardcoding of Visual Studio version ([PR #71](https://github.com/ponylang/net_ssl/pull/71))
-
-### Added
-
-
-### Changed
-
 
 ## [1.2.0] - 2022-02-10
 
