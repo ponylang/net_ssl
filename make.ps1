@@ -145,7 +145,7 @@ function BuildTest
 
 function BuildLibs
 {
-  $libreSsl = "libressl-3.2.5"
+  $libreSsl = "libressl-3.5.0"
 
   if (-not ((Test-Path "$rootDir/crypto.lib") -and (Test-Path "$rootDir/ssl.lib")))
   {
@@ -169,7 +169,7 @@ function BuildLibs
     {
       Push-Location $libreSslSrc
       (Get-Content "$libreSslSrc\CMakeLists.txt").replace('add_definitions(-Dinline=__inline)', "add_definitions(-Dinline=__inline)`nadd_definitions(-DPATH_MAX=255)") | Set-Content "$libreSslSrc\CMakeLists.txt"
-      cmake.exe $libreSslSrc -G "Visual Studio 16 2019" -Thost=x64 -A x64 -DCMAKE_INSTALL_PREFIX="$libsDir" -DCMAKE_BUILD_TYPE="Release"
+      cmake.exe $libreSslSrc -Thost=x64 -A x64 -DCMAKE_INSTALL_PREFIX="$libsDir" -DCMAKE_BUILD_TYPE="Release"
       if ($LastExitCode -ne 0) { Pop-Location; throw "Error configuring $libreSsl" }
       cmake.exe --build . --target install --config Release
       if ($LastExitCode -ne 0) { Pop-Location; throw "Error building $libreSsl" }
@@ -177,9 +177,9 @@ function BuildLibs
     }
 
     # copy to the root dir (i.e. PONYPATH) for linking
-    Copy-Item -Force -Path "$libsDir/lib/ssl-48.lib" -Destination "$rootDir/ssl.lib"
-    Copy-Item -Force -Path "$libsDir/lib/crypto-46.lib" -Destination "$rootDir/crypto.lib"
-    Copy-Item -Force -Path "$libsDir/lib/tls-20.lib" -Destination "$rootDir/tls.lib"
+    Copy-Item -Force -Path "$libsDir/lib/ssl-52.lib" -Destination "$rootDir/ssl.lib"
+    Copy-Item -Force -Path "$libsDir/lib/crypto-49.lib" -Destination "$rootDir/crypto.lib"
+    Copy-Item -Force -Path "$libsDir/lib/tls-24.lib" -Destination "$rootDir/tls.lib"
   }
 }
 

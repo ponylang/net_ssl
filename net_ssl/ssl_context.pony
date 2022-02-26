@@ -2,6 +2,7 @@ use "files"
 
 use "lib:crypt32" if windows
 use "lib:cryptui" if windows
+use "lib:bcrypt" if windows
 
 use @memcpy[Pointer[U8]](dst: Pointer[None], src: Pointer[None], n: USize)
 use @SSL_CTX_ctrl[ILong](
