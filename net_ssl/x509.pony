@@ -8,7 +8,7 @@ use @X509_NAME_get_text_by_NID[I32](name: Pointer[_X509Name], nid: I32,
 use @X509_get_ext_d2i[Pointer[_GeneralNameStack]](cert: Pointer[X509],
   nid: I32, crit: Pointer[U8], idx: Pointer[U8])
 use @OPENSSL_sk_pop[Pointer[_GeneralName]](stack: Pointer[_GeneralNameStack])
-  if "openssl_1.1.x"
+  if "openssl_1.1.x" or "openssl_3.0.x"
 use @sk_pop[Pointer[_GeneralName]](stack: Pointer[_GeneralNameStack])
   if "openssl_0.9.0"
 use @GENERAL_NAME_get0_value[Pointer[U8] tag](name: Pointer[_GeneralName],
@@ -18,7 +18,7 @@ use @ASN1_STRING_get0_data[Pointer[U8]](value: Pointer[U8] tag)
 use @ASN1_STRING_length[I32](value: Pointer[U8] tag)
 use @GENERAL_NAME_free[None](name: Pointer[_GeneralName])
 use @OPENSSL_sk_free[None](stack: Pointer[_GeneralNameStack])
-  if "openssl_1.1.x"
+  if "openssl_1.1.x" or "openssl_3.0.x"
 use @sk_free[None](stack: Pointer[_GeneralNameStack])
   if "openssl_0.9.0"
 
@@ -84,7 +84,7 @@ primitive X509
     end
 
     var name =
-      ifdef "openssl_1.1.x" then
+      ifdef "openssl_1.1.x" or "openssl_3.0.x" then
         @OPENSSL_sk_pop(stack)
       elseif "openssl_0.9.0" then
         @sk_pop(stack)
@@ -130,7 +130,7 @@ primitive X509
       end
 
       @GENERAL_NAME_free(name)
-      ifdef "openssl_1.1.x" then
+      ifdef "openssl_1.1.x" or "openssl_3.0.x" then
         name = @OPENSSL_sk_pop(stack)
       elseif "openssl_0.9.0" then
         name = @sk_pop(stack)
@@ -139,7 +139,7 @@ primitive X509
       end
     end
 
-    ifdef "openssl_1.1.x" then
+    ifdef "openssl_1.1.x" or "openssl_3.0.x" then
       @OPENSSL_sk_free(stack)
     elseif "openssl_0.9.0" then
       @sk_free(stack)
