@@ -9,6 +9,7 @@ All notable changes to this library will be documented in this file. This projec
 
 ### Added
 
+- Add support for OpenSSL 3.0.x ([PR #81](https://github.com/ponylang/net_ssl/pull/81))
 
 ### Changed
 
