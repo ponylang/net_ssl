@@ -2,17 +2,11 @@
 
 All notable changes to this library will be documented in this file. This project adheres to [Semantic Versioning](http://semver.org/) and [Keep a CHANGELOG](http://keepachangelog.com/).
 
-## [unreleased] - unreleased
-
-### Fixed
-
+## [1.3.0] - 2023-01-03
 
 ### Added
 
 - Add support for OpenSSL 3.0.x ([PR #81](https://github.com/ponylang/net_ssl/pull/81))
-
-### Changed
-
 
 ## [1.2.1] - 2022-02-26
 
