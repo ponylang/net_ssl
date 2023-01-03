@@ -11,11 +11,11 @@ use @SSL_CTX_ctrl[ILong](
   arg: ULong,
   parg: Pointer[None])
 use @SSLv23_method[Pointer[None]]() if "openssl_0.9.0"
-use @TLS_method[Pointer[None]]() if "openssl_1.1.x"
+use @TLS_method[Pointer[None]]() if "openssl_1.1.x" or "openssl_3.0.x"
 use @SSL_CTX_new[Pointer[_SSLContext]](method: Pointer[None])
 use @SSL_CTX_free[None](ctx: Pointer[_SSLContext] tag)
-use @SSL_CTX_clear_options[ULong](ctx: Pointer[_SSLContext] tag, opts: ULong) if "openssl_1.1.x"
-use @SSL_CTX_set_options[ULong](ctx: Pointer[_SSLContext] tag, opts: ULong) if "openssl_1.1.x"
+use @SSL_CTX_clear_options[ULong](ctx: Pointer[_SSLContext] tag, opts: ULong) if "openssl_1.1.x" or "openssl_3.0.x"
+use @SSL_CTX_set_options[ULong](ctx: Pointer[_SSLContext] tag, opts: ULong) if "openssl_1.1.x" or "openssl_3.0.x"
 use @SSL_CTX_use_certificate_chain_file[I32](ctx: Pointer[_SSLContext] tag, file: Pointer[U8] tag)
 use @SSL_CTX_use_PrivateKey_file[I32](ctx: Pointer[_SSLContext] tag, file: Pointer[U8] tag, typ: I32)
 use @SSL_CTX_check_private_key[I32](ctx: Pointer[_SSLContext] tag)
@@ -36,9 +36,9 @@ use @CertCloseStore[Bool](store: Pointer[U8] tag, flags: U32) if windows
 use @SSL_CTX_set_cipher_list[I32](ctx: Pointer[_SSLContext] tag, control: Pointer[U8] tag)
 use @SSL_CTX_set_verify_depth[None](ctx: Pointer[_SSLContext] tag, depth: U32)
 use @SSL_CTX_set_alpn_select_cb[None](ctx: Pointer[_SSLContext] tag, cb: _ALPNSelectCallback,
-   resolver: ALPNProtocolResolver) if "openssl_1.1.x"
+   resolver: ALPNProtocolResolver) if "openssl_1.1.x" or "openssl_3.0.x"
 use @SSL_CTX_set_alpn_protos[I32](ctx: Pointer[_SSLContext] tag, protos: Pointer[U8] tag,
-  protos_len: USize) if "openssl_1.1.x"
+  protos_len: USize) if "openssl_1.1.x" or "openssl_3.0.x"
 
 primitive _SSLContext
 
@@ -83,7 +83,7 @@ class val SSLContext
     """
     Create an SSL context.
     """
-    ifdef "openssl_1.1.x" then
+    ifdef "openssl_1.1.x" or "openssl_3.0.x" then
       _ctx = @SSL_CTX_new(@TLS_method())
 
       // Allow only newer ciphers.
@@ -104,7 +104,7 @@ class val SSLContext
     end
 
   fun _set_options(opts: ULong) =>
-    ifdef "openssl_1.1.x" then
+    ifdef "openssl_1.1.x" or "openssl_3.0.x" then
       @SSL_CTX_set_options(_ctx, opts)
     elseif "openssl_0.9.0" then
       @SSL_CTX_ctrl(_ctx, _SslCtrlSetOptions(), opts, Pointer[None])
@@ -113,7 +113,7 @@ class val SSLContext
     end
 
   fun _clear_options(opts: ULong) =>
-    ifdef "openssl_1.1.x" then
+    ifdef "openssl_1.1.x" or "openssl_3.0.x" then
       @SSL_CTX_clear_options(_ctx, opts)
     elseif "openssl_0.9.0" then
       @SSL_CTX_ctrl(_ctx, _SslCtrlClearOptions(), opts, Pointer[None])
@@ -318,7 +318,7 @@ class val SSLContext
     Returns true on success
     Requires OpenSSL >= 1.0.2
     """
-    ifdef "openssl_1.1.x" then
+    ifdef "openssl_1.1.x" or "openssl_3.0.x" then
       @SSL_CTX_set_alpn_select_cb(
         _ctx, addressof SSLContext._alpn_select_cb, resolver)
       return true
@@ -336,7 +336,7 @@ class val SSLContext
     Returns true on success
     Requires OpenSSL >= 1.0.2
     """
-    ifdef "openssl_1.1.x" then
+    ifdef "openssl_1.1.x" or "openssl_3.0.x" then
       try
         let proto_list = _ALPNProtocolList.from_array(protocols)?
         let result =
