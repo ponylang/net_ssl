@@ -12,6 +12,7 @@ All notable changes to this library will be documented in this file. This projec
 
 ### Changed
 
+- Change location we download LibreSSL from for Windows users ([PR #85](https://github.com/ponylang/net_ssl/pull/85))
 
 ## [1.3.0] - 2023-01-03
 
