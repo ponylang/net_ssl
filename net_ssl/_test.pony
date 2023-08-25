@@ -703,7 +703,7 @@ class \nodoc\ iso _TestX509Certificate is UnitTest
 
       let certificate: X509Certificate val = X509Certificate.from_pem(pemdata)?
       h.assert_false(certificate.is_null())
-      h.assert_eq[String](certificate.get_pem(), pemdata)
+      h.assert_eq[String](certificate.get_pem(), pemdata.clone().>remove("\r"))
       h.assert_eq[String](certificate.issuer_name()?, "R3")
       h.assert_eq[String](certificate.subject_name()?, "ponylang.io")
       h.assert_eq[String](certificate.fingerprint(), "6F6E4D79A77B44D524F8C2FB62E46559B3FF7EB4")

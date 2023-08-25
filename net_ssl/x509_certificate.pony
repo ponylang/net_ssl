@@ -34,10 +34,17 @@ class X509Certificate
     """
     A constructor that takes a certificate as PEM data.
     """
-    let bio: _BIO = _BIO
-    if (not bio.write(data)) then error end
-    _cert = @PEM_read_bio_X509(bio.apply(), Pointer[X509], Pointer[None], Pointer[None])
-    if (_cert.is_null()) then error end
+    let bio: Pointer[_BIO] tag = _BIO.new_ptr()
+    if (not _BIO.write(bio, data)) then
+      _BIO.free(bio)
+      error
+    end
+    _cert = @PEM_read_bio_X509(bio, Pointer[X509], Pointer[None], Pointer[None])
+    if (_cert.is_null()) then
+      _BIO.free(bio)
+      error
+    end
+    _BIO.free(bio)
 
   fun _ptr(): Pointer[X509] tag =>
     _cert
@@ -53,7 +60,8 @@ class X509Certificate
     Returns the certificate's CN.
     """
     _X509Name.string(@X509_get_subject_name(_cert))?
-/*
+
+    /*
   fun not_before_posix(): I64 =>
     """
     Returns the notBefore time for the certificate in UNIX epoch form.
@@ -73,18 +81,23 @@ class X509Certificate
     Returns an object that represents a collection of Extensions.
     """
     StackX509Extension.create_from_x509(_cert)
+
 */
-
-
   fun print(): String val ? =>
     """
     Returns a textual representation of the certificate in a form which
     is identical to openssl x509 -text.
     """
-    let bio: _BIO = _BIO
-    if (@X509_print(bio.apply(), _cert) != 1) then error end
-    bio.string()
-/*
+    let bio: Pointer[_BIO] tag = _BIO.new_ptr()
+    if (@X509_print(bio, _cert) != 1) then
+      _BIO.free(bio)
+      error
+    end
+    let t: String val = _BIO.string(bio)
+    _BIO.free(bio)
+    t
+
+    /*
   fun authority_key_id(): String val ? =>
     """
     Returns the Key ID of the Issuing CA Certificate as a string.
@@ -147,6 +160,7 @@ class X509Certificate
 */
   fun is_null(): Bool => _cert.is_null()
 
+
   fun fingerprint(): String val =>
     let size_array: Array[U32] = Array[U32].init(0,1)
     let sha1: Pointer[_EVPMD] = @EVP_sha1()
@@ -161,21 +175,21 @@ class X509Certificate
     end
     consume fpr
 
-
   fun get_pem(): String iso^ =>
-    let bio: _BIO = _BIO
-    bio.write_pem_x509(this)
+    let bio: Pointer[_BIO] tag = _BIO.new_ptr()
+    _BIO.write_pem_x509(bio, this)
 
     let pem: String iso = recover iso
       let certpem: String ref = recover ref String end
       let buffer: Array[U8] ref = recover ref Array[U8].>undefined(1024) end
 
       while (true) do
-        let amount_read: U32 = @BIO_gets(bio.apply(), buffer.cpointer(), U32(1024))
+        let amount_read: U32 = @BIO_gets(bio, buffer.cpointer(), U32(1024))
         if (amount_read == 0) then break end
         certpem.concat(buffer.values(), 0, amount_read.usize())
       end
       certpem
     end
+    _BIO.free(bio)
     consume pem
 

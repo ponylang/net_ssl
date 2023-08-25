@@ -8,7 +8,7 @@ use @BIO_ctrl_pending[USize](bio: Pointer[_BIO] tag)
 use @BIO_gets[U32](bio: Pointer[_BIO] tag, buffer: Pointer[U8] tag, size: U32)
 use @PEM_write_bio_X509[U32](bio: Pointer[_BIO] tag, cert: Pointer[X509] tag)
 
-class _BIO
+primitive _BIO
   """
   BIO is OpenSSL's generic datastructure that allows the rest of the library
   to write "contiguous" binary data without having to worry about memory
@@ -18,19 +18,11 @@ class _BIO
 
   // Notate why this isn't used in the SSL setup. (double-free)
   """
-  let _bio: Pointer[_BIO] tag = @BIO_new(@BIO_s_mem())
 
-  new create() =>
-    None
+  fun new_ptr(): Pointer[_BIO] tag =>
+    @BIO_new(@BIO_s_mem())
 
-  fun apply(): Pointer[_BIO] tag =>
-    """
-    Alas the pointer needs to be exposed to the calling module so it can
-    be passed to the FFI call that needs it
-    """
-    _bio
-
-  fun array(): Array[U8] val =>
+  fun array(bio: Pointer[_BIO] tag): Array[U8] val =>
     """
     Returns the contents of the BIO as an Array[U8] val
     /// use "buffered" 
@@ -39,35 +31,35 @@ class _BIO
       var tarr: Array[U8] ref = Array[U8]
       let buffer: Array[U8] ref = Array[U8].init(0, 1024) // Look for the 95% percentile
       var len: I32 = 0
-      while ((len = @BIO_read(_bio, buffer.cpointer(), buffer.size().u32())); len > 0) do
+      while ((len = @BIO_read(bio, buffer.cpointer(), buffer.size().u32())); len > 0) do
         buffer.copy_to(tarr, 0, tarr.size(), len.usize())
       end
       tarr
     end
 
-  fun write(data: (Array[U8] val | String val)): Bool =>
+  fun write(bio: Pointer[_BIO] tag, data: (Array[U8] val | String val)): Bool =>
     """
     Writes the contents of the provided Array[U8] or String to the
     BIO
     """
-    let readdata: I32 = @BIO_write(_bio, data.cpointer(), data.size().u32())
+    let readdata: I32 = @BIO_write(bio, data.cpointer(), data.size().u32())
     (readdata == data.size().i32())
 
-  fun string(): String val =>
+  fun string(bio: Pointer[_BIO] tag): String val =>
     """
     Returns the contents of the BIO as a String val
     """
-    String.from_array(array())
+    String.from_array(array(bio))
 
 
-  fun write_pem_x509(cert: X509Certificate box): U32 =>
+  fun write_pem_x509(bio: Pointer[_BIO] tag, cert: X509Certificate box): U32 =>
     """
     Writes the certificate in pem form into this Bio object
     """
-    @PEM_write_bio_X509(_bio, cert._ptr())
+    @PEM_write_bio_X509(bio, cert._ptr())
 
 
-  fun _final() =>
-    @BIO_free_all(_bio)
+  fun free(bio: Pointer[_BIO] tag) =>
+    @BIO_free_all(bio)
 
 
