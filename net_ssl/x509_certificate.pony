@@ -2,12 +2,25 @@ use "format"
 use "collections"
 
 use @X509_new[Pointer[X509] tag]()
+use @X509_dup[Pointer[X509] tag](x: Pointer[X509] tag)
+use @X509_free[None](x: Pointer[X509] tag)
 use @X509_print[I32](bp: Pointer[_BIO] tag, x: Pointer[X509] tag)
 use @PEM_read_bio_X509[Pointer[X509] tag](bio: Pointer[_BIO] tag, x509: Pointer[X509] tag, cb: Pointer[None], u: Pointer[None])
 use @X509_get_issuer_name[Pointer[_X509Name] tag](a: Pointer[X509] tag)
 use @X509_get_subject_name[Pointer[_X509Name] tag](a: Pointer[X509] tag)
 use @X509_digest[U32](data: Pointer[X509] tag, dtype: Pointer[_EVPMD], str: Pointer[U8] tag, len: Pointer[U32] tag)
 use @EVP_sha1[Pointer[_EVPMD]]()
+use @EVP_sha256[Pointer[_EVPMD]]()
+use @EVP_md5[Pointer[_EVPMD]]()
+use @X509_get0_notAfter[Pointer[ASN1String] tag](x: Pointer[X509] tag)
+use @X509_get0_notBefore[Pointer[ASN1String] tag](x: Pointer[X509] tag)
+use @X509_get0_serialNumber[Pointer[ASN1String] tag](x: Pointer[X509] tag)
+use @X509_get0_subject_key_id[Pointer[ASN1String] tag](x: Pointer[X509] tag)
+use @X509_get0_authority_key_id[Pointer[ASN1String] tag](x: Pointer[X509] tag)
+
+
+use @X509_check_ca[ISize](x: Pointer[X509] tag)
+use @X509_self_signed[ISize](x: Pointer[X509] tag, verify: ISize)
 
 
 
@@ -23,7 +36,7 @@ class X509Certificate
   new create() =>
     _cert = @X509_new()
 
-  new val _from_cert_ptr(cert: Pointer[X509] tag) =>
+  new iso _from_cert_ptr(cert: Pointer[X509] tag) =>
     """
     Private method used to create the X509Certificate from an Established SSL
     connection
@@ -49,6 +62,10 @@ class X509Certificate
   fun _ptr(): Pointer[X509] tag =>
     _cert
 
+	fun clone(): X509Certificate iso^ =>
+		X509Certificate._from_cert_ptr(@X509_dup(_cert))
+
+
   fun issuer_name(): String val ? =>
    """
     Returns the issuer's CN.
@@ -61,7 +78,7 @@ class X509Certificate
     """
     _X509Name.string(@X509_get_subject_name(_cert))?
 
-    /*
+
   fun not_before_posix(): I64 =>
     """
     Returns the notBefore time for the certificate in UNIX epoch form.
@@ -76,13 +93,12 @@ class X509Certificate
     let notb4: Pointer[ASN1String] tag = @X509_get0_notAfter(_cert)
     ASN1String.time_to_posix(notb4)
 
-  fun get_extensions(): StackX509Extension =>
-    """
-    Returns an object that represents a collection of Extensions.
-    """
-    StackX509Extension.create_from_x509(_cert)
+//  fun get_extensions(): StackX509Extension =>
+//    """
+//    Returns an object that represents a collection of Extensions.
+//    """
+//    StackX509Extension.create_from_x509(_cert)
 
-*/
   fun print(): String val ? =>
     """
     Returns a textual representation of the certificate in a form which
@@ -97,7 +113,7 @@ class X509Certificate
     _BIO.free(bio)
     t
 
-    /*
+
   fun authority_key_id(): String val ? =>
     """
     Returns the Key ID of the Issuing CA Certificate as a string.
@@ -157,16 +173,43 @@ class X509Certificate
       cnt = cnt + 1
     end
     consume string
-*/
+
   fun is_null(): Bool => _cert.is_null()
 
-
-  fun fingerprint(): String val =>
+  fun fingerprint_sha1(): String val =>
     let size_array: Array[U32] = Array[U32].init(0,1)
     let sha1: Pointer[_EVPMD] = @EVP_sha1()
     let sbuff: Array[U8] ref = recover ref Array[U8].init(0,64) end
 
     let r: U32 = @X509_digest(_cert, sha1, sbuff.cpointer(), size_array.cpointer())
+    var fpr: String trn = recover String end
+    try
+      for f in Range(0, size_array(0)?.usize()) do
+        fpr = fpr + Format.int[U8](sbuff(f)? where width = 2, fmt = FormatHexBare, prec=2)
+      end
+    end
+    consume fpr
+
+  fun fingerprint_sha256(): String val =>
+    let size_array: Array[U32] = Array[U32].init(0,1)
+    let sha256: Pointer[_EVPMD] = @EVP_sha256()
+    let sbuff: Array[U8] ref = recover ref Array[U8].init(0,64) end
+
+    let r: U32 = @X509_digest(_cert, sha256, sbuff.cpointer(), size_array.cpointer())
+    var fpr: String trn = recover String end
+    try
+      for f in Range(0, size_array(0)?.usize()) do
+        fpr = fpr + Format.int[U8](sbuff(f)? where width = 2, fmt = FormatHexBare, prec=2)
+      end
+    end
+    consume fpr
+
+  fun fingerprint_md5(): String val =>
+    let size_array: Array[U32] = Array[U32].init(0,1)
+    let md5: Pointer[_EVPMD] = @EVP_md5()
+    let sbuff: Array[U8] ref = recover ref Array[U8].init(0,64) end
+
+    let r: U32 = @X509_digest(_cert, md5, sbuff.cpointer(), size_array.cpointer())
     var fpr: String trn = recover String end
     try
       for f in Range(0, size_array(0)?.usize()) do
@@ -193,3 +236,15 @@ class X509Certificate
     _BIO.free(bio)
     consume pem
 
+	fun is_ca(): Bool =>
+		if (@X509_check_ca(_cert) == 1) then true else false end
+
+	fun is_self_signed(): Bool ? =>
+		match @X509_self_signed(_cert, 1)
+		|let t: ISize if (t == 0) => return false
+		|let t: ISize if (t == 1) => return true
+		end
+		error
+
+	fun _final() =>
+		@X509_free(_cert)

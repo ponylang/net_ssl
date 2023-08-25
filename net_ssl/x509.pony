@@ -10,9 +10,6 @@ use @sk_pop[Pointer[_GeneralName]](stack: Pointer[_GeneralNameStack])
   if "openssl_0.9.0"
 use @GENERAL_NAME_get0_value[Pointer[U8] tag](name: Pointer[_GeneralName],
   ptype: Pointer[I32])
-use @ASN1_STRING_type[I32](value: Pointer[U8] tag)
-use @ASN1_STRING_get0_data[Pointer[U8]](value: Pointer[U8] tag)
-use @ASN1_STRING_length[I32](value: Pointer[U8] tag)
 use @GENERAL_NAME_free[None](name: Pointer[_GeneralName])
 use @OPENSSL_sk_free[None](stack: Pointer[_GeneralNameStack])
   if "openssl_1.1.x" or "openssl_3.0.x"
@@ -91,7 +88,7 @@ primitive X509
     while not name.is_null() do
       var ptype = I32(0)
       let value =
-        @GENERAL_NAME_get0_value(name, addressof ptype)
+        @GENERAL_NAME_get0_value[Pointer[ASN1String] tag](name, addressof ptype)
 
       match ptype
       | 2 => // GEN_DNS

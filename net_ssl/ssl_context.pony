@@ -29,7 +29,6 @@ use @CertEnumCertificatesInStore[NullablePointer[_CertContext]](cert_store: Poin
 use @d2i_X509[Pointer[X509] tag](val_out: Pointer[U8] tag, der_in: Pointer[Pointer[U8]],
   length: U32)
 use @X509_STORE_add_cert[U32](store: Pointer[U8] tag, x509: Pointer[X509] tag)
-use @X509_free[None](x509: Pointer[X509] tag)
 use @SSL_CTX_set_cert_store[None](ctx: Pointer[_SSLContext] tag, store: Pointer[U8] tag)
 use @X509_STORE_free[None](store: Pointer[U8] tag)
 use @CertCloseStore[Bool](store: Pointer[U8] tag, flags: U32) if windows
