@@ -34,4 +34,6 @@ primitive ASN1String
     """
     let tm: Tm = Tm
     @ASN1_TIME_to_tm(asn1str, tm)
-    tm.mktime() + tm.tm_gmtoff
+    let t: I64 = tm.mktime()
+    @printf("%d : %d\n".cstring(), tm.tm_gmtoff, t)
+    t + tm.tm_gmtoff
