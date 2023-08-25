@@ -15,6 +15,7 @@ actor \nodoc\ Main is TestList
     test(_TestTCPSSLExpect)
     test(_TestTCPSSLMute)
     test(_TestTCPSSLUnmute)
+    test(_TestX509Certificate)
     ifdef windows then
       test(_TestWindowsLoadRootCertificates)
     else
@@ -684,3 +685,32 @@ primitive \nodoc\ _TestSSLContext
       end
 
     (consume ssl_client, consume ssl_server)
+
+//    test(_TestX509Certificates)
+
+class \nodoc\ iso _TestX509Certificate is UnitTest
+  """
+  Test loading a certificate and analyze it's metadata.
+  """
+  fun name(): String => "x509/_TestX509Certificate"
+
+  fun ref apply(h: TestHelper) =>
+    try
+      let auth = FileAuth(h.env.root)
+      let fp: FilePath = FilePath(auth, "assets/ponylang.pem")
+      let f: File = File.open(fp)
+      let pemdata: String val = f.read_string(f.size())
+
+      let certificate: X509Certificate val = X509Certificate.from_pem(pemdata)?
+      h.assert_false(certificate.is_null())
+      h.assert_eq[String](certificate.get_pem(), pemdata)
+      h.assert_eq[String](certificate.issuer_name()?, "R3")
+      h.assert_eq[String](certificate.subject_name()?, "ponylang.io")
+      h.assert_eq[String](certificate.fingerprint(), "6F6E4D79A77B44D524F8C2FB62E46559B3FF7EB4")
+      h.assert_true(true)
+
+
+    else
+      h.fail("Certificate Tests failed")
+    end
+

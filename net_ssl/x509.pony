@@ -2,9 +2,6 @@ use "collections"
 use "net"
 
 use @pony_os_ip_string[Pointer[U8]](src: Pointer[U8], len: I32)
-use @X509_get_subject_name[Pointer[_X509Name]](cert: Pointer[X509])
-use @X509_NAME_get_text_by_NID[I32](name: Pointer[_X509Name], nid: I32,
-  buf: Pointer[U8] tag, len: I32)
 use @X509_get_ext_d2i[Pointer[_GeneralNameStack]](cert: Pointer[X509],
   nid: I32, crit: Pointer[U8], idx: Pointer[U8])
 use @OPENSSL_sk_pop[Pointer[_GeneralName]](stack: Pointer[_GeneralNameStack])
@@ -22,7 +19,6 @@ use @OPENSSL_sk_free[None](stack: Pointer[_GeneralNameStack])
 use @sk_free[None](stack: Pointer[_GeneralNameStack])
   if "openssl_0.9.0"
 
-primitive _X509Name
 primitive _GeneralName
 primitive _GeneralNameStack
 
