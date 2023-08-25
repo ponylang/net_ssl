@@ -2,6 +2,7 @@ use @ASN1_TIME_to_tm[I32](asn1str: Pointer[ASN1String] tag, tm: Tm)
 use @ASN1_STRING_get0_data[Pointer[U8] ref](asn1s: Pointer[ASN1String] tag)
 use @ASN1_STRING_length[I32](asn1s: Pointer[ASN1String] tag)
 use @ASN1_STRING_type[I32](asn1s: Pointer[ASN1String] tag)
+use @printf[I32](fmt: Pointer[U8] tag, ...)
 
 primitive ASN1String
   """
@@ -33,5 +34,4 @@ primitive ASN1String
     """
     let tm: Tm = Tm
     @ASN1_TIME_to_tm(asn1str, tm)
-    tm.mktime()
-
+    tm.mktime() + tm.tm_gmtoff
