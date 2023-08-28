@@ -1,4 +1,4 @@
-use @mktime[I64](tm: Tm)
+use @timegm[I64](tm: Tm)
 
 struct Tm
   """
@@ -16,10 +16,10 @@ struct Tm
   var tm_gmtoff: I64 = I64(0) // FundamentalType
   var tm_zone: Pointer[U8] = Pointer[U8] // PointerType
 
-  fun ref mktime(): I64 =>
+  fun ref timegm(): I64 =>
     """
     Mapping to the C function call which takes a Tm struct and returns
-    the UNIX epoch time.
+    UTC UNIX epoch time.
     """
-    @mktime(this)
+    @timegm(this)
 
