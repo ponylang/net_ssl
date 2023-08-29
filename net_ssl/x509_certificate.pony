@@ -12,19 +12,21 @@ use @X509_digest[U32](data: Pointer[X509] tag, dtype: Pointer[_EVPMD], str: Poin
 use @EVP_sha1[Pointer[_EVPMD]]()
 use @EVP_sha256[Pointer[_EVPMD]]()
 use @EVP_md5[Pointer[_EVPMD]]()
+use @X509_get_version[I64](x: Pointer[X509] tag)
 use @X509_get0_notAfter[Pointer[ASN1String] tag](x: Pointer[X509] tag)
 use @X509_get0_notBefore[Pointer[ASN1String] tag](x: Pointer[X509] tag)
 use @X509_get0_serialNumber[Pointer[ASN1String] tag](x: Pointer[X509] tag)
-use @X509_get0_subject_key_id[Pointer[ASN1String] tag](x: Pointer[X509] tag)
-use @X509_get0_authority_key_id[Pointer[ASN1String] tag](x: Pointer[X509] tag)
+use @X509_get0_subject_key_id[Pointer[ASN1String] tag](x: Pointer[X509] tag) if "openssl_1.1.x" or "openssl_3.0.x"
+use @X509_get0_authority_key_id[Pointer[ASN1String] tag](x: Pointer[X509] tag) if "openssl_1.1.x" or "openssl_3.0.x"
 
 
 use @X509_check_ca[ISize](x: Pointer[X509] tag)
-use @X509_self_signed[ISize](x: Pointer[X509] tag, verify: ISize)
+use @X509_self_signed[ISize](x: Pointer[X509] tag, verify: ISize) if "openssl_3.0.x"
 
 
 
 primitive _EVPMD
+primitive _X509Unsupported
 
 class X509Certificate
   """
@@ -64,6 +66,22 @@ class X509Certificate
 
 	fun clone(): X509Certificate iso^ =>
 		X509Certificate._from_cert_ptr(@X509_dup(_cert))
+
+
+  fun version(): I64 =>
+    @X509_get_version(_cert) + 1
+
+  fun serial(): String val ? =>
+    """
+    Returns the Serial Number of the Certificate in its binary form.
+    """
+    _format_colon_hex(serial_raw()?)?
+
+
+
+
+
+
 
 
   fun issuer_name(): String val ? =>
@@ -124,8 +142,12 @@ class X509Certificate
     """
     Returns the Key ID of the Issuing CA Certificate in its binary form.
     """
-    let asn1s: Pointer[ASN1String] tag = @X509_get0_authority_key_id(_cert)
-    ASN1String.array(asn1s)?
+    ifdef "openssl_1.1.x" or "openssl_3.0.x" then
+      let asn1s: Pointer[ASN1String] tag = @X509_get0_authority_key_id(_cert)
+      ASN1String.array(asn1s)?
+    else
+      error
+    end
 
   fun key_id(): String val ? =>
     """
@@ -137,14 +159,13 @@ class X509Certificate
     """
     Returns the Key ID of the Certificate in its binary form.
     """
-    let asn1s: Pointer[ASN1String] tag = @X509_get0_subject_key_id(_cert)
-    ASN1String.array(asn1s)?
+    ifdef "openssl_1.1.x" or "openssl_3.0.x" then
+      let asn1s: Pointer[ASN1String] tag = @X509_get0_subject_key_id(_cert)
+      ASN1String.array(asn1s)?
+    else
+      error
+    end
 
-  fun serial(): String val ? =>
-    """
-    Returns the Serial Number of the Certificate in its binary form.
-    """
-    _format_hex(serial_raw()?)?
 
   fun serial_raw(): Array[U8] val ? =>
     """
@@ -240,11 +261,15 @@ class X509Certificate
 		if (@X509_check_ca(_cert) == 1) then true else false end
 
 	fun is_self_signed(): Bool ? =>
-		match @X509_self_signed(_cert, 1)
-		|let t: ISize if (t == 0) => return false
-		|let t: ISize if (t == 1) => return true
-		end
-		error
+    ifdef "openssl_3.0.x" then
+  		match @X509_self_signed(_cert, 1)
+  		|let t: ISize if (t == 0) => return false
+  		|let t: ISize if (t == 1) => return true
+  		end
+  		error
+    else
+      error
+    end
 
 	fun _final() =>
 		@X509_free(_cert)
