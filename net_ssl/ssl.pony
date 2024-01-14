@@ -150,7 +150,9 @@ class SSL
 
       if r <= 0 then
         match @SSL_get_error(_ssl, r)
-        | 1 | 5 | 6 => _state = SSLError
+        | 1 | 5 | 6 =>
+          _state = SSLError
+          return None
         | 2 =>
           // SSL buffer has more data but it is not yet decoded (or something)
           _read_buf.truncate(offset)
