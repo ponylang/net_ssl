@@ -146,7 +146,7 @@ function BuildTest
 function BuildLibs
 {
   # When upgrading, change $libreSsl, $libreSslLib, and the copied libs below
-  $libreSsl = "libressl-3.7.3"
+  $libreSsl = "libressl-3.9.1"
 
   if (-not ((Test-Path "$rootDir/crypto.lib") -and (Test-Path "$rootDir/ssl.lib")))
   {
@@ -176,9 +176,9 @@ function BuildLibs
     }
 
     # copy to the root dir (i.e. PONYPATH) for linking
-    Copy-Item -Force -Path "$libsDir/lib/ssl-53.lib" -Destination "$rootDir/ssl.lib"
-    Copy-Item -Force -Path "$libsDir/lib/crypto-50.lib" -Destination "$rootDir/crypto.lib"
-    Copy-Item -Force -Path "$libsDir/lib/tls-26.lib" -Destination "$rootDir/tls.lib"
+    Copy-Item -Force -Path "$libsDir/lib/ssl.lib" -Destination "$rootDir/ssl.lib"
+    Copy-Item -Force -Path "$libsDir/lib/crypto.lib" -Destination "$rootDir/crypto.lib"
+    Copy-Item -Force -Path "$libsDir/lib/tls.lib" -Destination "$rootDir/tls.lib"
   }
 }
 
