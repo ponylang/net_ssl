@@ -9,7 +9,7 @@ Production ready.
 ## Installation
 
 * Install [corral](https://github.com/ponylang/corral)
-* `corral add github.com/ponylang/net_ssl.git --version 1.3.2`
+* `corral add github.com/ponylang/net_ssl.git --version 1.3.3`
 * `corral fetch` to fetch your dependencies
 * `use "net_ssl"` to include this package
 * `corral run -- ponyc` to compile your application
