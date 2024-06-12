@@ -8,8 +8,6 @@ use @SSL_ctrl[ILong](
 use @SSL_new[Pointer[_SSL]](ctx: Pointer[_SSLContext] tag)
 use @SSL_free[None](ssl: Pointer[_SSL] tag)
 use @SSL_set_verify[None](ssl: Pointer[_SSL], mode: I32, cb: Pointer[U8])
-use @BIO_s_mem[Pointer[U8]]()
-use @BIO_new[Pointer[_BIO]](typ: Pointer[U8])
 use @SSL_set_bio[None](ssl: Pointer[_SSL], rbio: Pointer[_BIO] tag, wbio: Pointer[_BIO] tag)
 use @SSL_set_accept_state[None](ssl: Pointer[_SSL])
 use @SSL_set_connect_state[None](ssl: Pointer[_SSL])
@@ -19,16 +17,12 @@ use @SSL_get0_alpn_selected[None](ssl: Pointer[_SSL] tag, data: Pointer[Pointer[
 use @SSL_pending[I32](ssl: Pointer[_SSL])
 use @SSL_read[I32](ssl: Pointer[_SSL], buf: Pointer[U8] tag, len: U32)
 use @SSL_write[I32](ssl: Pointer[_SSL], buf: Pointer[U8] tag, len: U32)
-use @BIO_read[I32](bio: Pointer[_BIO] tag, buf: Pointer[U8] tag, len: U32)
-use @BIO_write[I32](bio: Pointer[_BIO] tag, buf: Pointer[U8] tag, len: U32)
 use @SSL_get_error[I32](ssl: Pointer[_SSL], ret: I32)
-use @BIO_ctrl_pending[USize](bio: Pointer[_BIO] tag)
 use @SSL_has_pending[I32](ssl: Pointer[_SSL]) if "openssl_1.1.x" or "openssl_3.0.x"
-use @SSL_get_peer_certificate[Pointer[X509]](ssl: Pointer[_SSL]) if "openssl_1.1.x" or "openssl_0.9.0"
-use @SSL_get1_peer_certificate[Pointer[X509]](ssl: Pointer[_SSL]) if "openssl_3.0.x"
+use @SSL_get_peer_certificate[Pointer[X509]](ssl: Pointer[_SSL] tag) if "openssl_1.1.x" or "openssl_0.9.0"
+use @SSL_get1_peer_certificate[Pointer[X509]](ssl: Pointer[_SSL] tag) if "openssl_3.0.x"
 
 primitive _SSL
-primitive _BIO
 
 primitive SSLHandshake
 primitive SSLAuthFail
@@ -91,6 +85,17 @@ class SSL
       @SSL_set_connect_state(_ssl)
       @SSL_do_handshake(_ssl)
     end
+
+  fun get_peer_certificate(): X509Certificate val =>
+    """
+    Returns the X509Certificate from this SSL connection
+    """
+    ifdef "openssl_3.0.x" then
+      return X509Certificate._from_cert_ptr(
+        @SSL_get1_peer_certificate[Pointer[X509] tag](_ssl)
+      )
+    end
+    recover val X509Certificate end
 
   fun box alpn_selected(): (ALPNProtocolName | None) =>
     """
