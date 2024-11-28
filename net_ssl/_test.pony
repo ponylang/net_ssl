@@ -15,6 +15,7 @@ actor \nodoc\ Main is TestList
     test(_TestTCPSSLExpect)
     test(_TestTCPSSLMute)
     test(_TestTCPSSLUnmute)
+    test(_TestX509Certificate)
     ifdef windows then
       test(_TestWindowsLoadRootCertificates)
     else
@@ -684,3 +685,56 @@ primitive \nodoc\ _TestSSLContext
       end
 
     (consume ssl_client, consume ssl_server)
+
+//    test(_TestX509Certificates)
+
+class \nodoc\ iso _TestX509Certificate is UnitTest
+  """
+  Test loading a certificate and analyze it's metadata.
+  """
+  fun name(): String => "x509/_TestX509Certificate"
+
+  fun ref apply(h: TestHelper) =>
+    try
+      let auth = FileAuth(h.env.root)
+      let fp: FilePath = FilePath(auth, "assets/ponylang.pem")
+      let f: File = File.open(fp)
+      let pemdata: String val = f.read_string(f.size())
+
+      let certificate: X509Certificate val = X509Certificate.from_pem(pemdata)?
+      h.assert_false(certificate.is_null())
+      h.assert_eq[String](certificate.get_pem(), pemdata.clone().>remove("\r"))
+      h.assert_eq[String](certificate.issuer_name()?, "R3")
+      h.assert_eq[String](certificate.subject_name()?, "ponylang.io")
+      h.assert_eq[String](certificate.fingerprint_sha1(), "6F6E4D79A77B44D524F8C2FB62E46559B3FF7EB4")
+      h.assert_eq[String](certificate.fingerprint_sha256(), "35E5ACDA20A72168E05E93813A4B62F91E9E2594A243FE73213F4323BA264BFF")
+      h.assert_eq[String](certificate.fingerprint_md5(), "62AE902FC8BB8A66856CCC3A1066D663")
+      h.assert_eq[I64](certificate.not_before_posix(), 1692059427)
+      h.assert_eq[I64](certificate.not_after_posix(), 1699835426)
+      h.assert_eq[String](certificate.serial()?, "03:28:8D:F5:38:3C:17:26:58:02:DE:62:7C:44:C6:D3:85:35")
+      h.assert_false(certificate.is_ca())
+
+      ifdef "openssl_1.1.x" or "openssl_3.0.x" then
+        h.assert_eq[String](certificate.authority_key_id()?, "14:2E:B3:17:B7:58:56:CB:AE:50:09:40:E6:1F:AF:9D:8B:14:C2:C6")
+        h.assert_eq[String](certificate.key_id()?, "B5:4D:AD:EC:4A:57:BA:21:77:5B:0A:09:89:8C:91:51:D8:F3:36:0B")
+      else
+        h.assert_error({(): None ? => certificate.authority_key_id()?})
+        h.assert_error({(): None ? => certificate.key_id()?})
+      end
+
+      ifdef "openssl_3.0.x" then
+        h.assert_false(certificate.is_self_signed()?)
+      else
+        h.assert_error({(): None ? => certificate.is_self_signed()?})
+      end
+
+      let mcert: X509Certificate iso = certificate.clone()
+      h.assert_true(true)
+      h.assert_false(mcert.is_null())
+      h.assert_eq[String](mcert.get_pem(), pemdata.clone().>remove("\r"))
+
+
+    else
+      h.fail("Certificate Tests failed")
+    end
+

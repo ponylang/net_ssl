@@ -2,9 +2,6 @@ use "collections"
 use "net"
 
 use @pony_os_ip_string[Pointer[U8]](src: Pointer[U8], len: I32)
-use @X509_get_subject_name[Pointer[_X509Name]](cert: Pointer[X509])
-use @X509_NAME_get_text_by_NID[I32](name: Pointer[_X509Name], nid: I32,
-  buf: Pointer[U8] tag, len: I32)
 use @X509_get_ext_d2i[Pointer[_GeneralNameStack]](cert: Pointer[X509],
   nid: I32, crit: Pointer[U8], idx: Pointer[U8])
 use @OPENSSL_sk_pop[Pointer[_GeneralName]](stack: Pointer[_GeneralNameStack])
@@ -13,16 +10,12 @@ use @sk_pop[Pointer[_GeneralName]](stack: Pointer[_GeneralNameStack])
   if "openssl_0.9.0"
 use @GENERAL_NAME_get0_value[Pointer[U8] tag](name: Pointer[_GeneralName],
   ptype: Pointer[I32])
-use @ASN1_STRING_type[I32](value: Pointer[U8] tag)
-use @ASN1_STRING_get0_data[Pointer[U8]](value: Pointer[U8] tag)
-use @ASN1_STRING_length[I32](value: Pointer[U8] tag)
 use @GENERAL_NAME_free[None](name: Pointer[_GeneralName])
 use @OPENSSL_sk_free[None](stack: Pointer[_GeneralNameStack])
   if "openssl_1.1.x" or "openssl_3.0.x"
 use @sk_free[None](stack: Pointer[_GeneralNameStack])
   if "openssl_0.9.0"
 
-primitive _X509Name
 primitive _GeneralName
 primitive _GeneralNameStack
 
@@ -95,7 +88,7 @@ primitive X509
     while not name.is_null() do
       var ptype = I32(0)
       let value =
-        @GENERAL_NAME_get0_value(name, addressof ptype)
+        @GENERAL_NAME_get0_value[Pointer[ASN1String] tag](name, addressof ptype)
 
       match ptype
       | 2 => // GEN_DNS
