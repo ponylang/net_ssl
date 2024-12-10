@@ -43,7 +43,7 @@ jobs:
         run: make test config=debug ssl=0.9.0
 
   test-static-libressl-3-vs-ponyc-release:
-    name: LibreSSL 3.x with most recent ponyc release
+    name: Statically linked LibreSSL 3.x with most recent ponyc release
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/ponylang/shared-docker-ci-x86-64-unknown-linux-builder-with-libressl-3.9.2:release
