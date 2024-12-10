@@ -4,3 +4,6 @@ tags
 .deps/*
 /*.lib
 .vscode
+/libressl-*/
+/libssl.a
+/libcrypto.a
