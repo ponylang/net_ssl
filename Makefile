@@ -92,7 +92,7 @@ libressl-$(LIBRESSL_VERSION)/ssl/.libs/libssl.a: libressl-$(LIBRESSL_VERSION)
 	cd libressl-$(LIBRESSL_VERSION) && ./configure
 	$(MAKE) -C libressl-$(LIBRESSL_VERSION)
 
-libssl.a: libressl-$(LIBRESSL_VERSION)
+libssl.a: libressl-$(LIBRESSL_VERSION)/ssl/.libs/libssl.a
 	cp libressl-$(LIBRESSL_VERSION)/ssl/.libs/libssl.a libssl.a
 
 libressl-$(LIBRESSL_VERSION):
