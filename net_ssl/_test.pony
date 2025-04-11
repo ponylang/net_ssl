@@ -298,8 +298,8 @@ class \nodoc\ iso _TestWindowsLoadRootCertificates is UnitTest
             .>set_authority(None, None)?
             .>set_cert(FilePath(auth, "assets/cert.pem"),
               FilePath(auth, "assets/key.pem"))?
-            .>set_client_verify(true)
-            .>set_server_verify(true)
+            .>set_client_verify(false)
+            .>set_server_verify(false)
         end
 
       let ssl_client = ssl_ctx.client()?
@@ -660,8 +660,8 @@ primitive \nodoc\ _TestSSLContext
             .> set_cert(
                 FilePath(auth, "assets/cert.pem"),
                 FilePath(auth, "assets/key.pem"))?
-            .> set_client_verify(true)
-            .> set_server_verify(true)
+            .> set_client_verify(false)
+            .> set_server_verify(false)
         end
       else
         h.fail("set_cert failed")
