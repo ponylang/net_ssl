@@ -9,6 +9,7 @@ All notable changes to this library will be documented in this file. This projec
 
 ### Added
 
+- Enable building on arm64 Windows ([PR #117](https://github.com/ponylang/net_ssl/pull/117))
 
 ### Changed
 
